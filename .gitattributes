@@ -1,0 +1,5 @@
+/doc export-ignore
+/tests export-ignore
+/.* export-ignore
+/.editorconfig export-ignore
+/renovate.json export-ignore
