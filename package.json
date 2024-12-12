@@ -12,9 +12,9 @@
     },
     "exports": {
         ".": {
+            "types": "./dist/index.d.ts",
             "import": "./dist/index.es.js",
-            "require": "./dist/index.umd.js",
-            "types": "./dist/index.d.ts"
+            "require": "./dist/index.umd.js"
         }
     },
     "files": [
@@ -33,7 +33,7 @@
         "@types/node": "22.4.1",
         "commitlint": "19.6.0",
         "husky": "9.1.7",
-        "typescript": "^5.7.2",
+        "typescript": "5.4.2",
         "vite": "6.0.3",
         "vite-plugin-dts": "4.3.0",
         "vite-plugin-static-copy": "2.2.0"

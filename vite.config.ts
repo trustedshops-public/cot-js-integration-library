@@ -2,20 +2,19 @@ import { defineConfig } from "vite";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 import dts from "vite-plugin-dts";
 import fs from "fs";
-import path from "path";
+import path, { resolve } from "path";
 
 export default defineConfig({
   build: {
     minify: true,
     outDir: "dist",
     lib: {
-      entry: "src/index.ts",
-      name: "cot-integration-library",
+      entry: resolve(__dirname, "src/index.ts"),
+      name: "index",
       formats: ["es", "umd"],
-      fileName: (format) => `cot-integration-library.${format}.js`,
+      fileName: (format) => `index.${format}.js`,
     },
     rollupOptions: {
-      external: ["react", "react-dom"],
       treeshake: true,
     },
     reportCompressedSize: false,
