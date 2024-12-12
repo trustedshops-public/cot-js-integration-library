@@ -1,0 +1,92 @@
+version: 2.1
+
+orbs:
+  semantic-release: trustedshops-public/semantic-release@6.0.0
+
+npm_login: &npm_login
+  run:
+    name: Prepare NPM Login
+    command: |
+      echo "//npm.pkg.github.com/:_authToken=$GITHUB_TOKEN" >> .npmrc
+      cat .npmrc >> ~/.npmrc
+
+executors:
+  node:
+    docker:
+      - image: cimg/node:22.11.0
+    resource_class: small
+
+filters-all: &filters-all
+  branches:
+    only:
+      - /feat\/.*/
+      - /fix\/.*/
+      - /docs\/.*/
+      - /chore\/.*/
+      - /test\/.*/
+      - /refactor\/.*/
+      - /perf\/.*/
+      - /ci\/.*/
+      - /style\/.*/
+      - /revert\/.*/
+      - main
+
+filters-main: &filters-main
+  branches:
+    only: main
+
+attach_checkout_workspace: &attach_checkout_workspace
+  attach_workspace:
+    at: .
+
+persist_to_workspace: &persist_to_workspace
+  persist_to_workspace:
+    root: .
+    paths:
+      - .
+
+jobs:
+  install:
+    executor: node
+    steps:
+      - checkout
+      - restore_cache:
+          key: npm-packages-{{ checksum "package-lock.json" }}
+      - run: npm ci
+      - save_cache:
+          key: npm-packages-{{ checksum "package-lock.json" }}
+          paths:
+            - node_modules
+      - *persist_to_workspace
+
+  build:
+    executor: node
+    steps:
+      - *attach_checkout_workspace
+      - *npm_login
+      - run:
+          name: Build
+          command: |
+            npm run build
+      - *persist_to_workspace
+
+workflows:
+  npm-release:
+    jobs:
+      - install:
+          filters: *filters-all
+      - build:
+          filters: *filters-all
+          requires:
+            - install
+          context:
+            - github-package-rw
+      - semantic-release/with_existing_config:
+          name: semantic-release
+          attach_workspace: true
+          filters: *filters-main
+          workspace_root: ~/project
+          requires:
+            - build
+          context:
+            - github-package-rw
