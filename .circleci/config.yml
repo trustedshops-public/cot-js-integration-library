@@ -80,7 +80,7 @@ workflows:
           requires:
             - install
           context:
-            - github-package-rw
+            - semantic-release
       - semantic-release/with_existing_config:
           name: semantic-release
           attach_workspace: true
@@ -89,4 +89,4 @@ workflows:
           requires:
             - build
           context:
-            - github-package-rw
+            - semantic-release
