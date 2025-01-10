@@ -35,6 +35,7 @@ const client = new Client(
     <CLIENT_ID>, // Client ID - e.g. 'cot-switch-X1234567890123456789012345678901'
     <CLIENT_SECRET>, // Client Secret - e.g. '1234567890123456789012345678901234567890123456789012345678901234'
     <AUTH_STORAGE_INSTANCE>, // It can be any storage option implementing AuthStorageInterface - e.g. new DatabaseAuthStorage()
+    <COOKIE_STORAGE_INSTANCE>, // It can be any storage option implementing CookieStorageInterface - e.g. new CookieStorage()
     <ENV> // Environment (optional) - dev, qa, or prod, defaults to prod
 );
 
