@@ -27,7 +27,7 @@ Here is a basic example of how to use the library:
 On the backend side:
 
 ```TypeScript
-import { Client, DatabaseAuthStorage } from '@trustedshops/cot-integration-library';
+import { Client, DatabaseAuthStorage } from '@trustedshops-public/cot-integration-library';
 
 // Initialize the client
 const client = new Client(
