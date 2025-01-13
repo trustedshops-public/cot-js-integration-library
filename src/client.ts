@@ -383,7 +383,11 @@ class Client {
   }
 
   private setIdentityCookie(idToken: string): void {
-    this.cookieStorage.set(IDENTITY_COOKIE_KEY, idToken);
+    this.cookieStorage.set(
+      IDENTITY_COOKIE_KEY,
+      idToken,
+      new Date(Date.now() + 31536000000)
+    );
   }
 
   private removeIdentityCookie(): void {
