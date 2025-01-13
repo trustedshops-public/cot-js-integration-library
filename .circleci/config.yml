@@ -89,5 +89,5 @@ workflows:
           requires:
             - build
           context:
-            - npm-registry 
+            - npm-registry
             - semantic-release
