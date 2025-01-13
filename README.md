@@ -1,4 +1,4 @@
-# Community of Trust Javascript Integration Library
+# Community of Trust Javascript/Typescript Integration Library
 
 WORK IN PROGRESS
 
@@ -17,7 +17,7 @@ This library provides a comprehensive JavaScript/Typescript interface for integr
 To install the library, run the following command in your project directory:
 
 ```sh
-npm i @trustedshops/cot-integration-library
+npm i @trustedshops-public/cot-integration-library
 ```
 
 ## Usage
