@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.0.0...1.1.0) (2025-01-13)
+
+
+### Features
+
+* extend cookie storage interface to support expiration date for set method ([2b164fb](https://github.com/trustedshops-public/cot-js-integration-library/commit/2b164fb02dcec0414d912edb39b278338589d083))
+
 # 1.0.0 (2025-01-10)
 
 
