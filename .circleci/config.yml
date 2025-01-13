@@ -13,7 +13,7 @@ npm_login: &npm_login
 executors:
   node:
     docker:
-      - image: cimg/node:22.12.0
+      - image: cimg/node:22.13.0
     resource_class: small
 
 filters-all: &filters-all
