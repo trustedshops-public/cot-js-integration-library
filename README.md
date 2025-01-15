@@ -27,7 +27,7 @@ Here is a basic example of how to use the library:
 On the backend side:
 
 ```TypeScript
-import { Client, DatabaseAuthStorage } from '@trustedshops-public/cot-integration-library';
+import { Client } from '@trustedshops-public/cot-integration-library';
 
 // Initialize the client
 const client = new Client(
@@ -35,15 +35,17 @@ const client = new Client(
     <CLIENT_ID>, // Client ID - e.g. 'cot-switch-X1234567890123456789012345678901'
     <CLIENT_SECRET>, // Client Secret - e.g. '1234567890123456789012345678901234567890123456789012345678901234'
     <AUTH_STORAGE_INSTANCE>, // It can be any storage option implementing AuthStorageInterface - e.g. new DatabaseAuthStorage()
-    <COOKIE_STORAGE_INSTANCE>, // It can be any storage option implementing CookieStorageInterface - e.g. new CookieStorage()
     <ENV> // Environment (optional) - dev, test, or prod, defaults to prod
 );
 
+// Set the cookie handler to handle cookies
+client.setCookieHandler(<COOKIE_HANDLER_INSTANCE>);
+
 // Invoke handleCallback function to handle code coming from the authentication server
-client.handleCallback();
+await client.handleCallback(authCode);
 
 // Get anonymous consumer data for the current user
-client.getAnonymousConsumerData();
+const consumerData = await client.getAnonymousConsumerData();
 ```
 
 On the frontend side, place the following code in your HTML file where you want the widget to appear:
