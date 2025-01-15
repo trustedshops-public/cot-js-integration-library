@@ -21,7 +21,7 @@
         "dist"
     ],
     "scripts": {
-        "dev": "tsx --env-file=.env.local ./devserver/server.tsx",
+        "dev": "tsx watch --env-file=.env.local ./devserver/server.tsx",
         "build": "tsc && vite build --config vite.library.config.ts",
         "test": "jest",
         "prepare": "husky",
