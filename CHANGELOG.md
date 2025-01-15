@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.2.0...1.3.0) (2025-01-15)
+
+
+### Features
+
+* update development server layout and styling, enhance user insights display ([fb0fa3f](https://github.com/trustedshops-public/cot-js-integration-library/commit/fb0fa3fa42e9d2f2c021f58c2184955f8a8f4af2))
+
 # [1.2.0](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.1.0...1.2.0) (2025-01-15)
 
 
