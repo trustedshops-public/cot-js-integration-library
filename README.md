@@ -63,6 +63,14 @@ To get started with development, clone the repository and install the dependenci
 npm i
 ```
 
+Setup the environment variables:
+
+```sh
+cp .env.example .env.local
+```
+
+and fill in the required values.
+
 To run the tests, use the following command:
 
 ```sh
