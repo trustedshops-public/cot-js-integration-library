@@ -80,6 +80,7 @@ workflows:
           requires:
             - install
           context:
+            - npm-registry
             - semantic-release
       - semantic-release/with_existing_config:
           name: semantic-release
