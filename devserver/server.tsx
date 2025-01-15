@@ -20,18 +20,12 @@ if (!tsId || !clientId || !clientSecret) {
   process.exit(1);
 }
 
-// Create https server
+// Create vite server
 const app = express();
 app.use(cookieParser());
 const vite = await createServer({
   server: {
     middlewareMode: true,
-    https: {
-      key: fs.existsSync(path.resolve(import.meta.dirname, "../certs/localhost-key.pem"))
-        ? fs.readFileSync(path.resolve(import.meta.dirname, "../certs/localhost-key.pem")) : undefined,
-      cert: fs.existsSync(path.resolve(import.meta.dirname, "../certs/localhost.pem")) ?
-        fs.readFileSync(path.resolve(import.meta.dirname, "../certs/localhost.pem")) : undefined,
-    }
   },
   appType: 'custom',
   base,
@@ -91,6 +85,7 @@ app.all('*', async (req, res) => {
   }
 })
 
+// Create HTTPS server
 https.createServer({
   key: fs.existsSync(path.resolve(import.meta.dirname, "../certs/localhost-key.pem"))
     ? fs.readFileSync(path.resolve(import.meta.dirname, "../certs/localhost-key.pem"))
