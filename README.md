@@ -1,7 +1,5 @@
 # Community of Trust Javascript/Typescript Integration Library
 
-WORK IN PROGRESS
-
 ![License](https://img.shields.io/github/license/trustedshops-public/cot-js-integration-library)
 [![CircleCI](https://dl.circleci.com/status-badge/img/gh/trustedshops-public/cot-js-integration-library/tree/main.svg?style=shield)](https://dl.circleci.com/status-badge/redirect/gh/trustedshops-public/cot-js-integration-library/tree/main)
 
