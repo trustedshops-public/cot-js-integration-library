@@ -1,3 +1,4 @@
+import https from 'node:https';
 import fs from "fs";
 import express from 'express';
 import cookieParser from 'cookie-parser';
@@ -6,10 +7,6 @@ import { InFileAuthStorage } from './in-file-authstorage';
 import { Client, CookieHandlerInterface, ActionType } from '../src';
 import { createServer } from 'vite';
 import 'dotenv/config';
-
-import https from 'node:https';
-
-const importMeta= import.meta;
 
 const port = process.env.PORT || 5174;
 const base = process.env.BASE || '/';
@@ -23,12 +20,18 @@ if (!tsId || !clientId || !clientSecret) {
   process.exit(1);
 }
 
-// Create http server
+// Create https server
 const app = express();
 app.use(cookieParser());
 const vite = await createServer({
   server: {
     middlewareMode: true,
+    https: {
+      key: fs.existsSync(path.resolve(import.meta.dirname, "../certs/localhost-key.pem"))
+        ? fs.readFileSync(path.resolve(import.meta.dirname, "../certs/localhost-key.pem")) : undefined,
+      cert: fs.existsSync(path.resolve(import.meta.dirname, "../certs/localhost.pem")) ?
+        fs.readFileSync(path.resolve(import.meta.dirname, "../certs/localhost.pem")) : undefined,
+    }
   },
   appType: 'custom',
   base,
