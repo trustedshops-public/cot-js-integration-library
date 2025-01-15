@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.3.0...1.4.0) (2025-01-15)
+
+
+### Features
+
+* implement HTTPS server configuration and update layout styling ([ab6d6fa](https://github.com/trustedshops-public/cot-js-integration-library/commit/ab6d6fa3a1934e42f9d5f85ff90c515ebc863813))
+
 # [1.3.0](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.2.0...1.3.0) (2025-01-15)
 
 
