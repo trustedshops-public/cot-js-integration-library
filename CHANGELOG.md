@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.1.0...1.2.0) (2025-01-15)
+
+
+### Features
+
+* add example environment file, implement cookie handler interface, and set up development server components ([3819ef5](https://github.com/trustedshops-public/cot-js-integration-library/commit/3819ef5b2b73d895e6cee8b785481df5446a42c6))
+
 # [1.1.0](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.0.0...1.1.0) (2025-01-13)
 
 
