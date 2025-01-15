@@ -7,7 +7,7 @@ npm_login: &npm_login
   run:
     name: Prepare NPM Login
     command: |
-      echo "//npm.pkg.github.com/:_authToken=$GITHUB_TOKEN" >> .npmrc
+      echo "//npm.pkg.github.com/:_authToken=$NPM_TOKEN" >> .npmrc
       cat .npmrc >> ~/.npmrc
 
 executors:
@@ -89,4 +89,5 @@ workflows:
           requires:
             - build
           context:
+            - npm-registry
             - semantic-release
