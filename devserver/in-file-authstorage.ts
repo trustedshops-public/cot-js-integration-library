@@ -1,6 +1,5 @@
-import { AuthStorageInterface } from "../src/types/auth-storage.type";
-import { CotToken } from "../src/types/cot-token.type";
 import fs from "fs";
+import { AuthStorageInterface, CotToken } from "../src";
 
 export class InFileAuthStorage implements AuthStorageInterface {
   private filePath: string;
