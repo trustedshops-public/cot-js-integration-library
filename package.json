@@ -24,7 +24,6 @@
         "dev": "tsx --env-file=.env.local ./devserver/server.tsx",
         "build": "tsc && vite build --config vite.library.config.ts",
         "test": "jest",
-        "preview": "vite preview",
         "prepare": "husky",
         "generate-ssl-cert": "cd certs && mkcert -install && mkcert localhost"
     },
