@@ -1,0 +1,19 @@
+.App {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+
+  .App-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  hr {
+    margin: 20px 0;
+    border: none;
+    border-top: 1px solid #ccc;
+  }
+}

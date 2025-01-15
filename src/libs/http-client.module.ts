@@ -9,17 +9,26 @@ type BodyInit =
   | null
   | string;
 
+type HeadersInit =
+  | string[][]
+  | Record<string, string | ReadonlyArray<string>>
+  | Headers;
+
 const request = async <TRESPONSE, TBODY extends BodyInit | undefined>(
   method: string,
   url: string,
   body?: TBODY,
-  headers?: any
-) => {
+  headers?: HeadersInit
+): Promise<TRESPONSE> => {
   const response = await fetch(url, {
-    method: method,
-    body: body,
-    headers: headers,
+    method,
+    body,
+    headers,
   });
+
+  if (!response.ok) {
+    throw new Error(`${response.status} ${response.statusText}`);
+  }
 
   return response.json() as Promise<TRESPONSE>;
 };

@@ -1,4 +1,3 @@
-import jwt, { TokenExpiredError } from "jsonwebtoken";
 import * as jose from "jose";
 import NodeCache from "node-cache";
 import { Logger } from "winston";
@@ -13,21 +12,22 @@ import {
   UnexpectedError,
 } from "./errors";
 import httpClient from "./libs/http-client.module";
-import { CookieStorageInterface } from "./types/cookie-storage.type";
+import { CookieHandlerInterface } from "./types/cookie-handler.type";
 import { TokenErrorResponse, TokenResponse } from "./types/token-response.type";
 import { decryptValue, encryptValue } from "./utils/encryption.util";
 import { generateCodeChallenge, generateCodeVerifier } from "./utils/pkce.util";
+import { AnonymousConsumerData } from "./types/anonymous-consumer-data.type";
 
 const ENV_URIS = {
   authServerBaseUri: {
-    dev: "https://auth-integr.trustedshops.com/auth/realms/myTS-DEV/protocol/openid-connect/",
-    test: "https://auth-qa.trustedshops.com/auth/realms/myTS-QA/protocol/openid-connect/",
-    prod: "https://auth.trustedshops.com/auth/realms/myTS/protocol/openid-connect/",
+    dev: "https://auth-integr.trustedshops.com/auth/realms/myTS-DEV/protocol/openid-connect",
+    test: "https://auth-qa.trustedshops.com/auth/realms/myTS-QA/protocol/openid-connect",
+    prod: "https://auth.trustedshops.com/auth/realms/myTS/protocol/openid-connect",
   },
   resourceServerBaseUri: {
-    dev: "https://scoped-cns-data.consumer-account-dev.trustedshops.com/api/v1/",
-    test: "https://scoped-cns-data.consumer-account-test.trustedshops.com/api/v1/",
-    prod: "https://scoped-cns-data.consumer-account.trustedshops.com/api/v1/",
+    dev: "https://scoped-cns-data.consumer-account-dev.trustedshops.com/api/v1",
+    test: "https://scoped-cns-data.consumer-account-test.trustedshops.com/api/v1",
+    prod: "https://scoped-cns-data.consumer-account.trustedshops.com/api/v1",
   },
 };
 
@@ -35,30 +35,26 @@ const IDENTITY_COOKIE_KEY = "TRSTD_ID_TOKEN";
 const CODE_VERIFIER_COOKIE_KEY = "TRSTD_CV";
 const CODE_CHALLENGE_COOKIE_KEY = "TRSTD_CC";
 
-const JWKS_CACHE_KEY = "JWKS";
-const JWKS_CACHE_TTL = 3600; // 1 hour
-
 const CONSUMER_ANONYMOUS_DATA_CACHE_KEY = "CONSUMER_ANONYMOUS_DATA_";
 const CONSUMER_ANONYMOUS_DATA_CACHE_TTL = 3600; // 1 hour
 
-class Client {
+export class Client {
   private authServerBaseUri: string;
   private resourceServerBaseUri: string;
   private tsId: string;
   private clientId: string;
   private clientSecret: string;
   private authStorage: AuthStorageInterface;
-  private cookieStorage: CookieStorageInterface;
+  private cookieHandler?: CookieHandlerInterface;
   private logger: Logger | null = null;
-  private jwksCache: NodeCache;
   private cache: NodeCache;
+  private jwks;
 
   constructor(
     tsId: string,
     clientId: string,
     clientSecret: string,
     authStorage: AuthStorageInterface,
-    cookieStorage: CookieStorageInterface,
     env: "dev" | "test" | "prod" = "prod"
   ) {
     if (!tsId) {
@@ -77,61 +73,58 @@ class Client {
       throw new RequiredParameterMissingError("AuthStorage is required.");
     }
 
-    if (!cookieStorage) {
-      throw new RequiredParameterMissingError("CookieStorage is required.");
-    }
-
     this.tsId = tsId;
     this.clientId = clientId;
     this.clientSecret = clientSecret;
     this.authStorage = authStorage;
-    this.cookieStorage = cookieStorage;
     this.authServerBaseUri = ENV_URIS.authServerBaseUri[env];
     this.resourceServerBaseUri = ENV_URIS.resourceServerBaseUri[env];
-    this.jwksCache = new NodeCache();
     this.cache = new NodeCache();
+    this.jwks = jose.createRemoteJWKSet(
+      new URL(`${this.authServerBaseUri}/certs`)
+    );
   }
 
-  public handleCallback(code: string, cotAction?: ActionType): void {
+  public async handleCallback(
+    code?: string,
+    cotAction?: ActionType
+  ): Promise<void> {
     if (code) {
-      this.handleAuthCode(code);
+      await this.handleAuthCode(code);
     } else if (cotAction) {
       this.handleAction(cotAction as ActionType);
     }
 
-    this.refreshPKCE(false);
+    await this.refreshPKCE(false);
   }
 
-  public async getAnonymousConsumerData(): Promise<any | null> {
+  public async getAnonymousConsumerData(): Promise<AnonymousConsumerData | null> {
     try {
       const idToken = this.getIdentityCookie();
-
       if (!idToken) {
-        throw new TokenNotFoundError(
-          "A valid token cannot be found in storage. Authentication is required."
-        );
+        return null;
       }
 
       const accessToken = await this.getOrRefreshAccessToken(idToken);
-      const decodedToken = this.decodeToken(idToken, false);
+      const decodedToken = await this.decodeToken(idToken, false);
 
       const cacheKey = `${CONSUMER_ANONYMOUS_DATA_CACHE_KEY}${decodedToken.ctc_id}`;
-      const cachedConsumerAnonymousDataItem = this.cache.get(cacheKey);
+      const cachedConsumerAnonymousDataItem =
+        this.cache.get<AnonymousConsumerData>(cacheKey);
 
       if (cachedConsumerAnonymousDataItem) {
         return cachedConsumerAnonymousDataItem;
       }
 
-      const headers = {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      };
+      const headers = new Headers();
+      headers.append("Content-Type", "application/json");
+      headers.append("Authorization", `Bearer ${accessToken}`);
 
-      const consumerAnonymousData = await httpClient.get(
+      const consumerAnonymousData = await httpClient.get<AnonymousConsumerData>(
         `${this.resourceServerBaseUri}/anonymous-data${
           this.tsId ? `?shopId=${this.tsId}` : ""
         }`,
-        { headers }
+        headers
       );
 
       this.cache.set(cacheKey, consumerAnonymousData);
@@ -146,6 +139,14 @@ class Client {
     }
   }
 
+  public setCookieHandler(cookieHandler: CookieHandlerInterface) {
+    if (!cookieHandler) {
+      throw new RequiredParameterMissingError("CookieHandler is required.");
+    }
+
+    this.cookieHandler = cookieHandler;
+  }
+
   public setLogger(logger: Logger): void {
     this.logger = logger;
   }
@@ -156,31 +157,30 @@ class Client {
       return null;
     }
 
-    this.refreshPKCE(true);
+    await this.refreshPKCE(true);
     this.setTokenOnStorage(token);
 
     return token;
   }
 
-  private disconnect(): void {
+  private async disconnect(): Promise<void> {
     const idToken = this.getIdentityCookie();
     if (idToken) {
-      const decodedToken = this.decodeToken(idToken, false);
+      const decodedToken = await this.decodeToken(idToken, false);
       this.authStorage.remove(decodedToken.ctc_id);
       this.removeIdentityCookie();
     }
   }
 
   private async getToken(code: string): Promise<CotToken | null> {
-    const headers = {
-      "Content-Type": "application/x-www-form-urlencoded",
-    };
+    const headers = new Headers();
+    headers.append("Content-Type", "application/x-www-form-urlencoded");
 
     const data = new URLSearchParams({
       grant_type: "authorization_code",
       client_id: this.clientId,
       client_secret: this.clientSecret,
-      redirect_uri: "", // TODO get current url as redirect uri
+      redirect_uri: "https://localhost:5174/", // TODO get current url as redirect uri
       code: code,
       code_verifier: this.getCodeVerifierCookie() || "",
     });
@@ -204,9 +204,8 @@ class Client {
   private async getRefreshedToken(
     refreshToken: string
   ): Promise<CotToken | null> {
-    const headers = {
-      "Content-Type": "application/x-www-form-urlencoded",
-    };
+    const headers = new Headers();
+    headers.append("Content-Type", "application/x-www-form-urlencoded");
 
     const data = new URLSearchParams({
       grant_type: "refresh_token",
@@ -234,7 +233,7 @@ class Client {
   private async getOrRefreshAccessToken(
     idToken: string
   ): Promise<string | undefined> {
-    const token = this.getTokenFromStorage(idToken);
+    const token = await this.getTokenFromStorage(idToken);
 
     if (token) {
       let shouldRefresh = false;
@@ -242,13 +241,13 @@ class Client {
       try {
         if (token.accessToken) {
           this.logger?.debug("access token is in storage. verifying...");
-          this.decodeToken(token.accessToken);
+          await this.decodeToken(token.accessToken);
         } else {
           this.logger?.debug("access token cannot be found. refreshing...");
           shouldRefresh = true;
         }
       } catch (error) {
-        if (error instanceof TokenExpiredError) {
+        if (error instanceof jose.errors.JWTExpired) {
           this.logger?.debug("access token is expired. refreshing...");
           shouldRefresh = true;
         } else {
@@ -299,12 +298,12 @@ class Client {
     );
   }
 
-  private setTokenOnStorage(token: CotToken): void {
+  private async setTokenOnStorage(token: CotToken): Promise<void> {
     try {
-      const decodedToken = this.decodeToken(token.idToken, false);
+      const decodedToken = await this.decodeToken(token.idToken, false);
       this.authStorage.set(decodedToken.ctc_id, token);
     } catch (error) {
-      if (error instanceof TokenExpiredError) {
+      if (error instanceof jose.errors.JWTExpired) {
         this.logger?.debug("id token is expired. returning...");
       } else {
         if (error instanceof Error) {
@@ -318,12 +317,12 @@ class Client {
     }
   }
 
-  private getTokenFromStorage(idToken: string): CotToken | null {
+  private async getTokenFromStorage(idToken: string): Promise<CotToken | null> {
     try {
-      const decodedToken = this.decodeToken(idToken, false);
+      const decodedToken = await this.decodeToken(idToken, false);
       return this.authStorage.get(decodedToken.ctc_id);
     } catch (error) {
-      if (error instanceof TokenExpiredError) {
+      if (error instanceof jose.errors.JWTExpired) {
         this.logger?.debug("id token is expired. returning...");
       } else {
         if (error instanceof Error) {
@@ -339,7 +338,7 @@ class Client {
     return null;
   }
 
-  private decodeToken(token: string, validateExp = true): any {
+  private async decodeToken(token: string, validateExp = true) {
     if (!token) {
       throw new TokenInvalidError("Token cannot be empty or null.");
     }
@@ -349,27 +348,15 @@ class Client {
       return JSON.parse(Buffer.from(tks[1], "base64").toString("utf-8"));
     }
 
-    return jwt.verify(token, this.getJWKS());
+    return await jose.jwtVerify(token, this.jwks);
   }
 
-  private getJWKS(): any {
-    if (!this.jwksCache.has(JWKS_CACHE_KEY)) {
-      const jwks = jose.createRemoteJWKSet(
-        new URL(`${this.authServerBaseUri}/certs`)
-      );
-      this.jwksCache.set(JWKS_CACHE_KEY, jwks);
-      this.jwksCache.ttl(JWKS_CACHE_KEY, JWKS_CACHE_TTL);
+  private async handleAuthCode(code: string): Promise<void> {
+    const token = await this.connect(code);
+
+    if (token) {
+      this.setIdentityCookie(token.idToken);
     }
-
-    return this.jwksCache.get(JWKS_CACHE_KEY);
-  }
-
-  private handleAuthCode(code: string): void {
-    this.connect(code).then((token) => {
-      if (token) {
-        this.setIdentityCookie(token.idToken);
-      }
-    });
   }
 
   private handleAction(actionType: ActionType): void {
@@ -379,11 +366,11 @@ class Client {
   }
 
   private getIdentityCookie(): string | null {
-    return this.cookieStorage.get(IDENTITY_COOKIE_KEY);
+    return this.cookieHandler?.get(IDENTITY_COOKIE_KEY) || null;
   }
 
   private setIdentityCookie(idToken: string): void {
-    this.cookieStorage.set(
+    this.cookieHandler?.set(
       IDENTITY_COOKIE_KEY,
       idToken,
       new Date(Date.now() + 31536000000)
@@ -391,21 +378,23 @@ class Client {
   }
 
   private removeIdentityCookie(): void {
-    this.cookieStorage.remove(IDENTITY_COOKIE_KEY);
+    this.cookieHandler?.remove(IDENTITY_COOKIE_KEY);
   }
 
   private setCodeVerifierAndChallengeCookie(
     codeVerifier: string,
     codeChallenge: string
   ): void {
-    const encryptedCodeVerifier = encryptValue(codeVerifier, this.clientSecret);
-    this.cookieStorage.set(CODE_VERIFIER_COOKIE_KEY, encryptedCodeVerifier);
-    this.cookieStorage.set(CODE_CHALLENGE_COOKIE_KEY, codeChallenge);
+    const encryptedCodeVerifier = encryptValue(this.clientSecret, codeVerifier);
+    this.cookieHandler?.set(CODE_VERIFIER_COOKIE_KEY, encryptedCodeVerifier);
+    this.cookieHandler?.set(CODE_CHALLENGE_COOKIE_KEY, codeChallenge);
   }
 
   private async refreshPKCE(force = false): Promise<void> {
-    const codeVerifierCookie = this.cookieStorage.get(CODE_VERIFIER_COOKIE_KEY);
-    const codeChallengeCookie = this.cookieStorage.get(
+    const codeVerifierCookie = this.cookieHandler?.get(
+      CODE_VERIFIER_COOKIE_KEY
+    );
+    const codeChallengeCookie = this.cookieHandler?.get(
       CODE_CHALLENGE_COOKIE_KEY
     );
 
@@ -417,16 +406,14 @@ class Client {
   }
 
   private getCodeVerifierCookie(): string | null {
-    const encryptedCodeVerifier = this.cookieStorage.get(
+    const encryptedCodeVerifier = this.cookieHandler?.get(
       CODE_VERIFIER_COOKIE_KEY
     );
 
     if (encryptedCodeVerifier) {
-      return decryptValue(encryptedCodeVerifier, this.clientSecret);
+      return decryptValue(this.clientSecret, encryptedCodeVerifier);
     }
 
     return null;
   }
 }
-
-export default Client;

@@ -27,3 +27,6 @@ coverage
 # certs
 localhost-key.pem
 localhost.pem
+
+# misc
+auth-storage.json
