@@ -7,7 +7,7 @@ npm_login: &npm_login
   run:
     name: Prepare NPM Login
     command: |
-      echo "//npm.pkg.github.com/:_authToken=$NPM_TOKEN" >> .npmrc
+      echo "//npm.pkg.github.com/:_authToken=$GITHUB_TOKEN" >> .npmrc
       cat .npmrc >> ~/.npmrc
 
 executors:
@@ -80,7 +80,6 @@ workflows:
           requires:
             - install
           context:
-            - npm-registry
             - semantic-release
       - semantic-release/with_existing_config:
           name: semantic-release
