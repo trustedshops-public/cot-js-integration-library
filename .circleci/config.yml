@@ -62,6 +62,18 @@ jobs:
             npm run build
       - *persist_to_workspace
 
+  release:
+    executor: semantic-release/default
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - semantic-release/install
+      - run:
+          name: Run semantic-release
+          command: |
+            semantic-release --branches main
+
 workflows:
   npm-release:
     jobs:
@@ -71,13 +83,10 @@ workflows:
           filters: *filters-all
           requires:
             - install
-      - semantic-release/with_existing_config:
-          name: semantic-release
-          attach_workspace: true
+      - release:
           filters: *filters-main
-          workspace_root: ~/project
           requires:
             - build
           context:
-            - npm-registry
             - semantic-release
+            - npm-registry
