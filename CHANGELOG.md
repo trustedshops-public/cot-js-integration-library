@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.7.0...1.8.0) (2025-01-16)
+
+
+### Features
+
+* integrate Vitest for testing and update configuration ([65f33e5](https://github.com/trustedshops-public/cot-js-integration-library/commit/65f33e510a46ba2c5ede1144c110e8f6847d41a4))
+
 # [1.7.0](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.6.0...1.7.0) (2025-01-16)
 
 
