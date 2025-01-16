@@ -62,6 +62,16 @@ jobs:
             npm run build
       - *persist_to_workspace
 
+  test:
+    executor: node
+    steps:
+      - *attach_checkout_workspace
+      - run:
+          name: Test
+          command: |
+            npm run test
+      - *persist_to_workspace
+
   release:
     executor: semantic-release/default
     steps:
@@ -83,10 +93,14 @@ workflows:
           filters: *filters-all
           requires:
             - install
+      - test:
+          filters: *filters-all
+          requires:
+            - build
       - release:
           filters: *filters-main
           requires:
-            - build
+            - test
           context:
             - semantic-release
             - npm-registry
