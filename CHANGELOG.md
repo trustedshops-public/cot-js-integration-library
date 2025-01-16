@@ -1,3 +1,10 @@
+## [1.5.3](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.5.2...1.5.3) (2025-01-16)
+
+
+### Bug Fixes
+
+* update NPM authentication token in CircleCI config ([98dcfe7](https://github.com/trustedshops-public/cot-js-integration-library/commit/98dcfe79a1527dbbb180c51c85326ea09e02c7b5))
+
 ## [1.5.2](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.5.1...1.5.2) (2025-01-16)
 
 
