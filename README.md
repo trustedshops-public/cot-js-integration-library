@@ -74,6 +74,18 @@ cp .env.example .env.local
 
 and fill in the required values.
 
+Generate local ssl certificates:
+
+```sh
+npm run generate-ssl-cert
+```
+
+To run local development server, use the following command:
+
+```sh
+npm run dev
+```
+
 To run the tests, use the following command:
 
 ```sh
@@ -84,12 +96,6 @@ To build the library, use the following command:
 
 ```sh
 npm run build
-```
-
-To run local development server, use the following command:
-
-```sh
-npm run dev
 ```
 
 ## Contributing
