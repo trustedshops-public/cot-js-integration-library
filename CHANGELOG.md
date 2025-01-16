@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.4.0...1.5.0) (2025-01-16)
+
+
+### Features
+
+* update client to handle redirect URI and adjust server route handling ([88c3644](https://github.com/trustedshops-public/cot-js-integration-library/commit/88c36443e7b85679af5c45c8016e4c123d016efc))
+
 # [1.4.0](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.3.0...1.4.0) (2025-01-15)
 
 
