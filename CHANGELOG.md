@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.6.0...1.7.0) (2025-01-16)
+
+
+### Features
+
+* add publishConfig to package.json for public access ([c8ad534](https://github.com/trustedshops-public/cot-js-integration-library/commit/c8ad5341b72bcf6c26b0f2f33f8bf2ec715896a1))
+
 # [1.6.0](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.5.4...1.6.0) (2025-01-16)
 
 
