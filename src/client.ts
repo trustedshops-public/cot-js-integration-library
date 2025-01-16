@@ -44,6 +44,7 @@ export class Client {
   private tsId: string;
   private clientId: string;
   private clientSecret: string;
+  private redirectUri: string;
   private authStorage: AuthStorageInterface;
   private cookieHandler?: CookieHandlerInterface;
   private logger: Logger | null = null;
@@ -79,6 +80,7 @@ export class Client {
     this.authStorage = authStorage;
     this.authServerBaseUri = ENV_URIS.authServerBaseUri[env];
     this.resourceServerBaseUri = ENV_URIS.resourceServerBaseUri[env];
+    this.redirectUri = "";
     this.cache = new NodeCache();
     this.jwks = jose.createRemoteJWKSet(
       new URL(`${this.authServerBaseUri}/certs`)
@@ -147,6 +149,15 @@ export class Client {
     this.cookieHandler = cookieHandler;
   }
 
+  public setRedirectUri(redirectUri: string): void {
+    if (!redirectUri) {
+      throw new RequiredParameterMissingError("Redirect URI is required.");
+    }
+
+    // Remove query parameters from the redirect URI
+    this.redirectUri = redirectUri.split("?")[0];
+  }
+
   public setLogger(logger: Logger): void {
     this.logger = logger;
   }
@@ -158,7 +169,7 @@ export class Client {
     }
 
     await this.refreshPKCE(true);
-    this.setTokenOnStorage(token);
+    await this.setTokenOnStorage(token);
 
     return token;
   }
@@ -180,7 +191,7 @@ export class Client {
       grant_type: "authorization_code",
       client_id: this.clientId,
       client_secret: this.clientSecret,
-      redirect_uri: "https://localhost:5174/", // TODO get current url as redirect uri
+      redirect_uri: this.redirectUri,
       code: code,
       code_verifier: this.getCodeVerifierCookie() || "",
     });
@@ -274,7 +285,7 @@ export class Client {
           }
 
           token.accessToken = refreshedToken.accessToken;
-          this.setTokenOnStorage(refreshedToken);
+          await this.setTokenOnStorage(refreshedToken);
           this.logger?.debug("Access token is refreshed. returning...");
 
           return token.accessToken;

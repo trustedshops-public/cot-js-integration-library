@@ -41,7 +41,7 @@ const client = new Client(
 );
 
 // Serve HTML
-app.all('*', async (req, res) => {
+app.get('/*', async (req, res) => {
   try {
     const cookieHandler: CookieHandlerInterface = {
       get: (key: string) => {
@@ -59,6 +59,7 @@ app.all('*', async (req, res) => {
       },
     };
     client.setCookieHandler(cookieHandler);
+    client.setRedirectUri(`${req.protocol}://${req.get('host')}${req.originalUrl}`);
 
     await client.handleCallback(
       req.query.code as string,
