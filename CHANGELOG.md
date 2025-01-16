@@ -1,3 +1,10 @@
+## [1.5.2](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.5.1...1.5.2) (2025-01-16)
+
+
+### Bug Fixes
+
+* remove sameSite attribute from cookie settings in server.tsx ([1ac8dfd](https://github.com/trustedshops-public/cot-js-integration-library/commit/1ac8dfdaa6cd89a12683b055c4aec6996d515f18))
+
 ## [1.5.1](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.5.0...1.5.1) (2025-01-16)
 
 
