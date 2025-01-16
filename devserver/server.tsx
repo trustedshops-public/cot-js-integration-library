@@ -50,7 +50,6 @@ app.get('/*', async (req, res) => {
       set: (key: string, value: string, expireDatetime?: Date) => {
         res.cookie(key, value, {
           expires: expireDatetime,
-          sameSite: "strict",
           secure: true,
         });
       },
