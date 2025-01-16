@@ -1,5 +1,5 @@
-import { AnonymousConsumerData } from "../../src";
 import "./App.css";
+import { AnonymousConsumerData } from "../../src";
 import * as React from "react";
 
 declare global {
