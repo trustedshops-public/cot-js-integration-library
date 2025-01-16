@@ -2,7 +2,7 @@ import React from "react";
 import { useEffect, useState } from "react";
 
 import "./App.css";
-import { AnonymousConsumerData } from "../../src";
+import { AnonymousConsumerData } from "../../../src";
 
 declare global {
   interface Window {
@@ -21,7 +21,7 @@ function App() {
   }, []);
 
   return (
-    <main className="App">
+    <main className="App" style={{ display: "none" }}>
       <div className="App-header">
         <h1>Development Server</h1>
         <trstd-switch tsid="X832CCBC339C1B6586599463D3C2C5DF5"></trstd-switch>
