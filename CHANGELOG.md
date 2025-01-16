@@ -1,3 +1,12 @@
+## [1.5.4](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.5.3...1.5.4) (2025-01-16)
+
+
+### Bug Fixes
+
+* remove NPM login steps and .npmrc file from CircleCI config ([9999336](https://github.com/trustedshops-public/cot-js-integration-library/commit/99993365215fe470d713e83efc274b1f6f2728c3))
+* update NPM authentication token URL in CircleCI config ([ac705c9](https://github.com/trustedshops-public/cot-js-integration-library/commit/ac705c9fc9bfc41e592448845b2127f84eb4b904))
+* update NPM registry URL in .npmrc ([df3175a](https://github.com/trustedshops-public/cot-js-integration-library/commit/df3175a26add394b76130156e47e91ef7f9548c4))
+
 ## [1.5.3](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.5.2...1.5.3) (2025-01-16)
 
 
