@@ -102,7 +102,13 @@ This library is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Acknowledgments
 
-TODO
+This project relies on several open-source libraries that have made development easier and more efficient. We would like to acknowledge the following libraries:
+
+- [jose](https://github.com/panva/jose) - A comprehensive and robust JavaScript library for JSON Web Tokens (JWT) and related standards.
+- [node-cache](https://github.com/node-cache/node-cache) - A simple and efficient in-memory caching module for Node.js.
+- [winston](https://github.com/winstonjs/winston) - A versatile and powerful logging library for Node.js.
+
+We are grateful to the developers and maintainers of these projects for their hard work and dedication.
 
 ## Versioning
 
