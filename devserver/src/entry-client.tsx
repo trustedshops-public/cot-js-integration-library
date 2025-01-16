@@ -1,7 +1,8 @@
-import { StrictMode } from 'react'
-import { hydrateRoot } from 'react-dom/client'
-import App from './App'
-import React from 'react'
+import React from 'react';
+import { StrictMode } from 'react';
+import { hydrateRoot } from 'react-dom/client';
+
+import App from './App';
 
 const rootElement = document.getElementById('root');
 if (rootElement) {
