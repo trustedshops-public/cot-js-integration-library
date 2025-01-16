@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.5.4...1.6.0) (2025-01-16)
+
+
+### Features
+
+* add semantic-release job to CircleCI configuration ([4e7322f](https://github.com/trustedshops-public/cot-js-integration-library/commit/4e7322fcab9a9beb1295935a5f65693fe5a7ab1c))
+
 ## [1.5.4](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.5.3...1.5.4) (2025-01-16)
 
 
