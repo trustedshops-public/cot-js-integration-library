@@ -27,7 +27,7 @@ On the backend side:
 ```TypeScript
 import { Client } from '@trustedshops-public/cot-integration-library';
 
-// Initialize the client
+// Initialize the client with the required parameters once
 const client = new Client(
     <TSID>, // Trusted Shops ID - e.g. 'X1234567890123456789012345678901'
     <CLIENT_ID>, // Client ID - e.g. 'cot-switch-X1234567890123456789012345678901'
@@ -36,8 +36,11 @@ const client = new Client(
     <ENV> // Environment (optional) - dev, test, or prod, defaults to prod
 );
 
-// Set the cookie handler to handle cookies
+// Set the cookie handler to handle cookies everytime before a request is made and handled
 client.setCookieHandler(<COOKIE_HANDLER_INSTANCE>);
+
+// Pass the actual url which the authentication has been started from to let authentication server verify the redirect uri e.g. 'https://www.example.com/shop'
+client.setRedirectUri(<REDIRECT_URI>);
 
 // Invoke handleCallback function to handle code coming from the authentication server
 await client.handleCallback(authCode);
