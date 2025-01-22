@@ -1,3 +1,10 @@
+## [1.8.1](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.8.0...1.8.1) (2025-01-22)
+
+
+### Bug Fixes
+
+* update package dependencies to latest versions and add missing events deps ([a5a92f6](https://github.com/trustedshops-public/cot-js-integration-library/commit/a5a92f641e673cb4548022f7077fb05571615eb3))
+
 # [1.8.0](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.7.0...1.8.0) (2025-01-16)
 
 
