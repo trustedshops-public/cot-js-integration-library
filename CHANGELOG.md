@@ -1,3 +1,10 @@
+## [1.8.5](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.8.4...1.8.5) (2025-01-22)
+
+
+### Bug Fixes
+
+* update code challenge generation to use createHash instead of subtle.digest ([cb236a6](https://github.com/trustedshops-public/cot-js-integration-library/commit/cb236a64a4d254654dcfb03e83a073778e44c441))
+
 ## [1.8.4](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.8.3...1.8.4) (2025-01-22)
 
 
