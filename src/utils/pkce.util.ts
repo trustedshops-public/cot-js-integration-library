@@ -1,4 +1,4 @@
-import { randomBytes, subtle } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 
 const generateCodeVerifier = (): string => {
   return btoa(String.fromCharCode(...randomBytes(32)))
@@ -10,7 +10,7 @@ const generateCodeVerifier = (): string => {
 const generateCodeChallenge = async (codeVerifier: string): Promise<string> => {
   const encoder = new TextEncoder();
   const data = encoder.encode(codeVerifier);
-  const digest = await subtle.digest("SHA-256", data);
+  const digest = createHash("sha256").update(data).digest();
   return btoa(String.fromCharCode(...new Uint8Array(digest)))
     .replace(/\+/g, "-")
     .replace(/\//g, "_")
