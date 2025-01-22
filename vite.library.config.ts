@@ -2,10 +2,11 @@ import { defineConfig } from "vite";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 import dts from "vite-plugin-dts";
 import { resolve } from "path";
+import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
 export default defineConfig({
   build: {
-    minify: true,
+    minify: "esbuild",
     outDir: "dist",
     lib: {
       entry: resolve(__dirname, "src/index.ts"),
@@ -17,6 +18,7 @@ export default defineConfig({
       treeshake: true,
     },
     reportCompressedSize: false,
+    sourcemap: true,
   },
   esbuild: {
     legalComments: "none",
@@ -36,5 +38,6 @@ export default defineConfig({
       ],
     }),
     dts({ rollupTypes: true }),
+    nodePolyfills(),
   ],
 });
