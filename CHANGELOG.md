@@ -1,3 +1,10 @@
+## [1.8.4](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.8.3...1.8.4) (2025-01-22)
+
+
+### Bug Fixes
+
+* replace getRandomValues with randomBytes for code verifier generation ([a846336](https://github.com/trustedshops-public/cot-js-integration-library/commit/a84633698f1ae8d930fe1670b05ad3d29a2ab331))
+
 ## [1.8.3](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.8.2...1.8.3) (2025-01-22)
 
 
