@@ -1,9 +1,7 @@
-import { getRandomValues, subtle } from "node:crypto";
+import { randomBytes, subtle } from "node:crypto";
 
 const generateCodeVerifier = (): string => {
-  const array = new Uint8Array(32);
-  getRandomValues(array);
-  return btoa(String.fromCharCode(...array))
+  return btoa(String.fromCharCode(...randomBytes(32)))
     .replace(/\+/g, "-")
     .replace(/\//g, "_")
     .replace(/=+$/, "");
