@@ -1,3 +1,10 @@
+## [1.8.3](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.8.2...1.8.3) (2025-01-22)
+
+
+### Bug Fixes
+
+* replace crypto module imports with specific functions from node:crypto ([f3c66bb](https://github.com/trustedshops-public/cot-js-integration-library/commit/f3c66bb69822bcd13b7b43db0c6e0c4b4308c4a1))
+
 ## [1.8.2](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.8.1...1.8.2) (2025-01-22)
 
 
