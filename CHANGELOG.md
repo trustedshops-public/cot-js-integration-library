@@ -1,3 +1,10 @@
+## [1.8.2](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.8.1...1.8.2) (2025-01-22)
+
+
+### Bug Fixes
+
+* add vite-plugin-node-polyfills and enable sourcemaps in build config ([26b57d0](https://github.com/trustedshops-public/cot-js-integration-library/commit/26b57d0dbe77aeca3d6029447bfb514711257175))
+
 ## [1.8.1](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.8.0...1.8.1) (2025-01-22)
 
 
