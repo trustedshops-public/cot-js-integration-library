@@ -1,3 +1,10 @@
+# [1.9.0](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.8.6...1.9.0) (2025-02-03)
+
+
+### Features
+
+* add Shopify integration example with initial setup and configurations ([d62bfa7](https://github.com/trustedshops-public/cot-js-integration-library/commit/d62bfa724bb69a4d39a93bde7a1facbbcd71fa39))
+
 ## [1.8.6](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.8.5...1.8.6) (2025-02-03)
 
 
