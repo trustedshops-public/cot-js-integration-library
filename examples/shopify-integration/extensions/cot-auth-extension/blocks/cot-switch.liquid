@@ -1,0 +1,88 @@
+<trstd-switch tsId="X832CCBC339C1B6586599463D3C2C5DF5" style="font-size: 9px; padding: 5px;"></trstd-switch>
+<script>
+  const getCookie = (name) =>
+    document.cookie.replace(new RegExp(`(?:(?:^|.*;\\s*)${name}\\s*=\\s*([^;]*).*$)|^.*$`), '$1');
+
+  const deleteCookie = (name) => {
+    document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+  };
+
+  const deleteCotCookies = () => {
+    deleteCookie('TRSTD_ID_TOKEN');
+    deleteCookie('TRSTD_CC');
+    deleteCookie('TRSTD_CV');
+  };
+
+  const getCOTCookies = () => {
+    const cookies = {};
+
+    const idToken = getCookie('TRSTD_ID_TOKEN');
+    if (idToken) {
+      cookies.TRSTD_ID_TOKEN = { value: idToken };
+    }
+
+    const cc = getCookie('TRSTD_CC');
+    if (cc) {
+      cookies.TRSTD_CC = { value: cc };
+    }
+
+    const cv = getCookie('TRSTD_CV');
+    if (cv) {
+      cookies.TRSTD_CV = { value: cv };
+    }
+
+    return cookies;
+  };
+
+  const setCOTCookies = (cookies) => {
+    if (!cookies) {
+      return;
+    }
+
+    deleteCotCookies();
+    Object.keys(cookies).forEach((key) => {
+      const cookie = cookies[key];
+      const expires = cookie.expires ? `expires=${cookie.expires};` : '';
+      document.cookie = `${key}=${cookie.value}; path=/; domain=.${window.location.host}; secure; ${expires}`.trim();
+    });
+  };
+
+  const post = (action, data) =>
+    fetch(`/apps/cot`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        action,
+        ...data,
+        cookies: getCOTCookies(),
+      }),
+    })
+      .then((res) => res.json())
+      .then((res) => setCOTCookies(res.cookies));
+
+  const appendSwitchScript = () => {
+    const script = document.createElement('script');
+    script.type = 'module';
+    script.src = 'https://widgets-qa.trustedshops.com/switch/switch.js';
+    document.body.appendChild(script);
+  };
+
+  const queryParams = new URLSearchParams(window.location.search);
+  const code = queryParams.get('code');
+  const redirectUri = window.location.href;
+
+  if (code) {
+    post('exchangeCode', { code, redirectUri }).then(() => appendSwitchScript());
+  } else {
+    post('getTokens').then(() => appendSwitchScript());
+  }
+</script>
+
+{% schema %}
+{
+  "name": "COT Switch",
+  "target": "section"
+}
+{% endschema %}

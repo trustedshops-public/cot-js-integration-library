@@ -1,0 +1,42 @@
+<div>
+  {% if shop.name %}
+    <h1>Your Shop Backend: {{ shop.name }} Demo</h1>
+  {% endif %}
+  <p>
+    This is the data that we are sharing in a secure way to your shopbackend with the OAuth2 flow, once the shopper has
+    given its authorisation:
+  </p>
+  <p id="cot-user-info">No community user found!</p>
+  <script>
+    const idToken = document.cookie.replace(/(?:(?:^|.*;\s*)TRSTD_ID_TOKEN\s*=\s*([^;]*).*$)|^.*$/, '$1');
+    fetch(`/apps/cot`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        action: 'getUserInfo',
+        cookies: {
+          TRSTD_ID_TOKEN: { value: idToken },
+        },
+      }),
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        if (res) {
+          document.getElementById('cot-user-info').innerHTML = `<pre style="text-align: left;">${JSON.stringify(
+            res,
+            null,
+            2
+          )}</pre>`;
+        }
+      });
+  </script>
+</div>
+
+{% schema %}
+{
+  "name": "COT Auth Debug",
+  "target": "section"
+}
+{% endschema %}
