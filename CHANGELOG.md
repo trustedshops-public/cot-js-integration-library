@@ -1,3 +1,10 @@
+## [1.8.6](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.8.5...1.8.6) (2025-02-03)
+
+
+### Bug Fixes
+
+* update AuthStorage and CookieHandler interfaces to return promises for async operations ([4c0f374](https://github.com/trustedshops-public/cot-js-integration-library/commit/4c0f374f508ff031857c22510db44889e834daa0))
+
 ## [1.8.5](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.8.4...1.8.5) (2025-01-22)
 
 
