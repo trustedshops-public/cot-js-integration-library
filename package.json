@@ -39,7 +39,7 @@
         "@types/cookie-parser": "^1.4.8",
         "@types/events": "^3.0.3",
         "@types/express": "^5.0.0",
-        "@types/node": "22.10.10",
+        "@types/node": "22.12.0",
         "@types/react": "^19.0.7",
         "@types/react-dom": "^19.0.3",
         "@vitejs/plugin-react": "^4.3.4",
