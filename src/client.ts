@@ -94,7 +94,7 @@ export class Client {
     if (code) {
       await this.handleAuthCode(code);
     } else if (cotAction) {
-      this.handleAction(cotAction as ActionType);
+      await this.handleAction(cotAction as ActionType);
     }
 
     await this.refreshPKCE(false);
@@ -102,7 +102,7 @@ export class Client {
 
   public async getAnonymousConsumerData(): Promise<AnonymousConsumerData | null> {
     try {
-      const idToken = this.getIdentityCookie();
+      const idToken = await this.getIdentityCookie();
       if (!idToken) {
         return null;
       }
@@ -175,7 +175,7 @@ export class Client {
   }
 
   private async disconnect(): Promise<void> {
-    const idToken = this.getIdentityCookie();
+    const idToken = await this.getIdentityCookie();
     if (idToken) {
       const decodedToken = await this.decodeToken(idToken, false);
       this.authStorage.remove(decodedToken.ctc_id);
@@ -187,13 +187,14 @@ export class Client {
     const headers = new Headers();
     headers.append("Content-Type", "application/x-www-form-urlencoded");
 
+    const codeVerifier = await this.getCodeVerifierCookie();
     const data = new URLSearchParams({
       grant_type: "authorization_code",
       client_id: this.clientId,
       client_secret: this.clientSecret,
       redirect_uri: this.redirectUri,
       code: code,
-      code_verifier: this.getCodeVerifierCookie() || "",
+      code_verifier: codeVerifier || "",
     });
 
     const tokenResponse = await httpClient.post<
@@ -366,22 +367,22 @@ export class Client {
     const token = await this.connect(code);
 
     if (token) {
-      this.setIdentityCookie(token.idToken);
+      await this.setIdentityCookie(token.idToken);
     }
   }
 
-  private handleAction(actionType: ActionType): void {
+  private async handleAction(actionType: ActionType): Promise<void> {
     if (actionType === "disconnect") {
-      this.disconnect();
+      await this.disconnect();
     }
   }
 
-  private getIdentityCookie(): string | null {
-    return this.cookieHandler?.get(IDENTITY_COOKIE_KEY) || null;
+  private async getIdentityCookie(): Promise<string | null> {
+    return (await this.cookieHandler?.get(IDENTITY_COOKIE_KEY)) || null;
   }
 
-  private setIdentityCookie(idToken: string): void {
-    this.cookieHandler?.set(
+  private async setIdentityCookie(idToken: string): Promise<void> {
+    await this.cookieHandler?.set(
       IDENTITY_COOKIE_KEY,
       idToken,
       new Date(Date.now() + 31536000000)
@@ -392,13 +393,16 @@ export class Client {
     this.cookieHandler?.remove(IDENTITY_COOKIE_KEY);
   }
 
-  private setCodeVerifierAndChallengeCookie(
+  private async setCodeVerifierAndChallengeCookie(
     codeVerifier: string,
     codeChallenge: string
-  ): void {
+  ): Promise<void> {
     const encryptedCodeVerifier = encryptValue(this.clientSecret, codeVerifier);
-    this.cookieHandler?.set(CODE_VERIFIER_COOKIE_KEY, encryptedCodeVerifier);
-    this.cookieHandler?.set(CODE_CHALLENGE_COOKIE_KEY, codeChallenge);
+    await this.cookieHandler?.set(
+      CODE_VERIFIER_COOKIE_KEY,
+      encryptedCodeVerifier
+    );
+    await this.cookieHandler?.set(CODE_CHALLENGE_COOKIE_KEY, codeChallenge);
   }
 
   private async refreshPKCE(force = false): Promise<void> {
@@ -412,12 +416,12 @@ export class Client {
     if (force || !codeVerifierCookie || !codeChallengeCookie) {
       const codeVerifier = generateCodeVerifier();
       const codeChallenge = await generateCodeChallenge(codeVerifier);
-      this.setCodeVerifierAndChallengeCookie(codeVerifier, codeChallenge);
+      await this.setCodeVerifierAndChallengeCookie(codeVerifier, codeChallenge);
     }
   }
 
-  private getCodeVerifierCookie(): string | null {
-    const encryptedCodeVerifier = this.cookieHandler?.get(
+  private async getCodeVerifierCookie(): Promise<string | null> {
+    const encryptedCodeVerifier = await this.cookieHandler?.get(
       CODE_VERIFIER_COOKIE_KEY
     );
 

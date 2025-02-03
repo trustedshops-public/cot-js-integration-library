@@ -1,7 +1,7 @@
 export interface CookieHandlerInterface {
-  get(key: string): string | undefined;
+  get(key: string): Promise<string | undefined>;
 
-  set(key: string, value: string, expireDatetime?: Date): void;
+  set(key: string, value: string, expireDatetime?: Date): Promise<void>;
 
-  remove(key: string): void;
+  remove(key: string): Promise<void>;
 }
