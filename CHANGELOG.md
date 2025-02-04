@@ -1,3 +1,10 @@
+## [1.9.1](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.9.0...1.9.1) (2025-02-04)
+
+
+### Bug Fixes
+
+* update application URLs in Shopify integration example ([d111a00](https://github.com/trustedshops-public/cot-js-integration-library/commit/d111a007aec34593401c0f1ce2659970b70d9580))
+
 # [1.9.0](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.8.6...1.9.0) (2025-02-03)
 
 
