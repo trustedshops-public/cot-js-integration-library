@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "a9589238a871cb000e0a61fa9f5e300b"
-application_url = "https://abraham-sun-effective-beaver.trycloudflare.com"
+application_url = "https://eternal-tahoe-dump-solutions.trycloudflare.com"
 embedded = true
 name = "javascript-integration"
 handle = "javascript-integration"
@@ -28,13 +28,13 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://abraham-sun-effective-beaver.trycloudflare.com/auth/callback",
-  "https://abraham-sun-effective-beaver.trycloudflare.com/auth/shopify/callback",
-  "https://abraham-sun-effective-beaver.trycloudflare.com/api/auth/callback"
+  "https://eternal-tahoe-dump-solutions.trycloudflare.com/auth/callback",
+  "https://eternal-tahoe-dump-solutions.trycloudflare.com/auth/shopify/callback",
+  "https://eternal-tahoe-dump-solutions.trycloudflare.com/api/auth/callback"
 ]
 
 [app_proxy]
-url = "https://abraham-sun-effective-beaver.trycloudflare.com/api/proxy"
+url = "https://eternal-tahoe-dump-solutions.trycloudflare.com/api/proxy"
 subpath = "cot"
 prefix = "apps"
 
