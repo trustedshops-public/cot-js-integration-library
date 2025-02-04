@@ -74,6 +74,8 @@ cp .env.example .env.local
 
 and fill in the required values.
 
+> **Hint:** You can use this environment variable for local testing of examples. Copy `.env.example` to `.env` and fill in the required values in the root directory of the example, e.g., `shopify-integration`.
+
 Generate local ssl certificates:
 
 ```sh
