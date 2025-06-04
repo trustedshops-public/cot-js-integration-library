@@ -46,7 +46,7 @@
         "commitlint": "^19.6.1",
         "cookie-parser": "^1.4.7",
         "dotenv": "^16.4.7",
-        "express": "^4.21.2",
+        "express": "^5.0.0",
         "husky": "^9.1.7",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
