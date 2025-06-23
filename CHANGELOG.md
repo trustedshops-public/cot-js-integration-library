@@ -1,3 +1,10 @@
+## [1.9.10](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.9.9...1.9.10) (2025-06-23)
+
+
+### Bug Fixes
+
+* update script source URLs to use the new CDN ([b6e249e](https://github.com/trustedshops-public/cot-js-integration-library/commit/b6e249e5ddbae63c7f4784f52b070b63f48e08a8))
+
 ## [1.9.9](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.9.8...1.9.9) (2025-06-16)
 
 
