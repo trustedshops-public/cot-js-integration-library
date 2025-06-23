@@ -406,10 +406,10 @@ export class Client {
   }
 
   private async refreshPKCE(force = false): Promise<void> {
-    const codeVerifierCookie = this.cookieHandler?.get(
+    const codeVerifierCookie = await this.cookieHandler?.get(
       CODE_VERIFIER_COOKIE_KEY
     );
-    const codeChallengeCookie = this.cookieHandler?.get(
+    const codeChallengeCookie = await this.cookieHandler?.get(
       CODE_CHALLENGE_COOKIE_KEY
     );
 
