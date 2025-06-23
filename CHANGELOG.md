@@ -1,3 +1,11 @@
+## [1.9.12](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.9.11...1.9.12) (2025-06-23)
+
+
+### Bug Fixes
+
+* await cookie retrieval in refreshPKCE method for proper async handling ([717e840](https://github.com/trustedshops-public/cot-js-integration-library/commit/717e840f16c628f9dd9620888563b1a558f55aa1))
+* update script source URL in index.html for development server ([9e279a4](https://github.com/trustedshops-public/cot-js-integration-library/commit/9e279a4fba247486ca12cda27266bc567934dde4))
+
 ## [1.9.11](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.9.10...1.9.11) (2025-06-23)
 
 
