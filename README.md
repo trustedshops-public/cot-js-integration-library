@@ -53,7 +53,7 @@ On the frontend side, place the following code in your HTML file where you want 
 
 ```html
 <trstd-switch tsId="X1234567890123456789012345678901"></trstd-switch>
-<script type="module" src="https://widgets.trustedshops.com/switch/switch.js"></script>
+<script type="module" src="https://cdn.trstd-login.trstd.com/switch/switch.js"></script>
 ```
 
 For more detailed examples, please refer to the [`examples/`](./examples/) directory.

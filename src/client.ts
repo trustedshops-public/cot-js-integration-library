@@ -39,17 +39,17 @@ const CONSUMER_ANONYMOUS_DATA_CACHE_KEY = "CONSUMER_ANONYMOUS_DATA_";
 const CONSUMER_ANONYMOUS_DATA_CACHE_TTL = 3600; // 1 hour
 
 export class Client {
-  private authServerBaseUri: string;
-  private resourceServerBaseUri: string;
-  private tsId: string;
-  private clientId: string;
-  private clientSecret: string;
+  private readonly authServerBaseUri: string;
+  private readonly resourceServerBaseUri: string;
+  private readonly tsId: string;
+  private readonly clientId: string;
+  private readonly clientSecret: string;
   private redirectUri: string;
-  private authStorage: AuthStorageInterface;
+  private readonly authStorage: AuthStorageInterface;
   private cookieHandler?: CookieHandlerInterface;
   private logger: Logger | null = null;
-  private cache: NodeCache;
-  private jwks;
+  private readonly cache: NodeCache;
+  private readonly jwks;
 
   constructor(
     tsId: string,

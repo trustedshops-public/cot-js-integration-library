@@ -52,9 +52,11 @@ app.get('/*', async (req, res) => {
           expires: expireDatetime,
           secure: true,
         });
+        return Promise.resolve();
       },
       remove: (key: string) => {
         res.clearCookie(key);
+        return Promise.resolve();
       },
     };
     client.setCookieHandler(cookieHandler);
