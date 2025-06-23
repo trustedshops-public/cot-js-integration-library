@@ -1,4 +1,4 @@
-import React, { StrictMode } from "react";
+import { StrictMode } from "react";
 import { renderToString } from "react-dom/server";
 
 import App from "./app/App";
