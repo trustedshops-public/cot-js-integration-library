@@ -100,6 +100,35 @@ export class Client {
     await this.refreshPKCE(false);
   }
 
+  /**
+   * Retrieves the access token for the current user.
+   *
+   * @returns {Promise<string | null>} The access token if available, otherwise null.
+   */
+  public async getAccessToken(): Promise<string | null> {
+    try {
+      const idToken = await this.getIdentityCookie();
+      if (!idToken) {
+        throw new TokenNotFoundError(
+          "A valid ID token cannot be found in cookies. Authentication is required."
+        );
+      }
+      return (await this.getOrRefreshAccessToken(idToken)) ?? null;
+    } catch (error) {
+      this.logger?.debug(
+        `Error occurred while getting access token: ${
+          error instanceof Error ? error.message : error
+        }`
+      );
+    }
+    return null;
+  }
+
+  /**
+   * Retrieves anonymous consumer data for the current user.
+   *
+   * @returns {Promise<AnonymousConsumerData | null>} The anonymous consumer data if available, otherwise null.
+   */
   public async getAnonymousConsumerData(): Promise<AnonymousConsumerData | null> {
     try {
       const idToken = await this.getIdentityCookie();
