@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import Script from "next/script";
-import { cotAuthHandler } from "./actions/cot-auth-handler";
+import { handleCotAuthCallback } from "./actions/handle-cot-auth-callback";
 import { AnonymousConsumerData } from "@trustedshops-public/cot-integration-library";
 
 export type CotSwitchProps = {
@@ -30,10 +30,10 @@ export default function CotSwitch({ tsid, onAuthenticationChange }: CotSwitchPro
   }, []);
 
   useEffect(() => {
-    const codeParam = searchParams.get('code');
-    const redirectUriParam = `${window.location.origin}${path}`;
+    const code = searchParams.get('code');
+    const redirectUri = `${window.location.origin}${path}`;
 
-    cotAuthHandler(codeParam, redirectUriParam).then(() => {
+    handleCotAuthCallback(code, redirectUri).then(() => {
       setIsReady(true);
       getCurrentCotUser().then((authUser) => {
         if (onAuthenticationChange) {
