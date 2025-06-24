@@ -1,3 +1,10 @@
+# [1.10.0](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.9.12...1.10.0) (2025-06-24)
+
+
+### Features
+
+* add getAccessToken method to retrieve access token for current user ([c0e7183](https://github.com/trustedshops-public/cot-js-integration-library/commit/c0e7183646d3461d3cfa9aa855bc334d367136be))
+
 ## [1.9.12](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.9.11...1.9.12) (2025-06-23)
 
 
