@@ -30,10 +30,10 @@ export default function CotSwitch({ tsid, onAuthenticationChange }: CotSwitchPro
   }, []);
 
   useEffect(() => {
-    const code = searchParams.get('code');
+    const code = searchParams.get('code') ?? undefined;
     const redirectUri = `${window.location.origin}${path}`;
 
-    handleCotAuthCallback(code, redirectUri).then(() => {
+    handleCotAuthCallback(redirectUri, code).then(() => {
       setIsReady(true);
       getCurrentCotUser().then((authUser) => {
         if (onAuthenticationChange) {
