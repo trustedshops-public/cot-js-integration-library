@@ -11,7 +11,7 @@ export default function Home() {
         <main className="flex flex-col min-h-screen w-full mx-auto max-w-[1920px] p-8">
             <header className="flex flex-row items-center justify-between py-8 border-b border-gray-200 mb-12">
                 <h1 className="text-4xl font-extrabold tracking-tight">
-                    My Shop
+                    My Store
                 </h1>
                 <CotSwitch
                     tsid="X832CCBC339C1B6586599463D3C2C5DF5"
@@ -41,7 +41,7 @@ export default function Home() {
                 </div>
             </section>
             <footer className="mt-16 text-center text-gray-400 text-sm">
-                &copy; {new Date().getFullYear()} My Shop. All rights reserved.
+                &copy; {new Date().getFullYear()} My Store. All rights reserved.
             </footer>
         </main>
     );
