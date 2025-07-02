@@ -139,7 +139,7 @@ export class Client {
       const accessToken = await this.getOrRefreshAccessToken(idToken);
       const decodedToken = await this.decodeToken(idToken, false);
 
-      const cacheKey = `${CONSUMER_ANONYMOUS_DATA_CACHE_KEY}${decodedToken.ctc_id}`;
+      const cacheKey = `${CONSUMER_ANONYMOUS_DATA_CACHE_KEY}${decodedToken.sub}`;
       const cachedConsumerAnonymousDataItem =
         this.cache.get<AnonymousConsumerData>(cacheKey);
 
@@ -207,7 +207,7 @@ export class Client {
     const idToken = await this.getIdentityCookie();
     if (idToken) {
       const decodedToken = await this.decodeToken(idToken, false);
-      this.authStorage.remove(decodedToken.ctc_id);
+      this.authStorage.remove(decodedToken.sub);
       this.removeIdentityCookie();
     }
   }
@@ -342,7 +342,7 @@ export class Client {
   private async setTokenOnStorage(token: CotToken): Promise<void> {
     try {
       const decodedToken = await this.decodeToken(token.idToken, false);
-      this.authStorage.set(decodedToken.ctc_id, token);
+      this.authStorage.set(decodedToken.sub, token);
     } catch (error) {
       if (error instanceof jose.errors.JWTExpired) {
         this.logger?.debug("id token is expired. returning...");
@@ -361,7 +361,7 @@ export class Client {
   private async getTokenFromStorage(idToken: string): Promise<CotToken | null> {
     try {
       const decodedToken = await this.decodeToken(idToken, false);
-      return this.authStorage.get(decodedToken.ctc_id);
+      return this.authStorage.get(decodedToken.sub);
     } catch (error) {
       if (error instanceof jose.errors.JWTExpired) {
         this.logger?.debug("id token is expired. returning...");

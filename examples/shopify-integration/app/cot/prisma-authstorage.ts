@@ -5,10 +5,10 @@ import type {
 import db from "../db.server";
 
 export default class PrismaAuthStorage implements AuthStorageInterface {
-  async get(ctcId: string): Promise<CotToken | null> {
+  async get(sub: string): Promise<CotToken | null> {
     const session = await db.cotAuthSession.findFirst({
       where: {
-        ctcId,
+        sub,
       },
     });
     if (!session) return null;
@@ -19,26 +19,26 @@ export default class PrismaAuthStorage implements AuthStorageInterface {
       refreshToken: refreshToken,
     };
   }
-  async set(ctcId: string, token: CotToken): Promise<void> {
+  async set(sub: string, token: CotToken): Promise<void> {
     await db.cotAuthSession.upsert({
-      where: { ctcId },
+      where: { sub },
       update: {
         idToken: token.idToken,
         accessToken: token.accessToken,
         refreshToken: token.refreshToken,
       },
       create: {
-        ctcId,
+        sub,
         idToken: token.idToken,
         accessToken: token.accessToken,
         refreshToken: token.refreshToken,
       },
     });
   }
-  async remove(ctcId: string): Promise<void> {
+  async remove(sub: string): Promise<void> {
     await db.cotAuthSession.deleteMany({
       where: {
-        ctcId,
+        sub,
       },
     });
   }

@@ -20,21 +20,21 @@ export class InFileAuthStorage implements AuthStorageInterface {
     fs.writeFileSync(this.filePath, JSON.stringify(storage, null, 2));
   }
 
-  get(ctcId: string): Promise<CotToken | null> {
+  get(sub: string): Promise<CotToken | null> {
     const storage = this.readStorage();
-    return Promise.resolve(storage[ctcId] || null);
+    return Promise.resolve(storage[sub] || null);
   }
 
-  set(ctcId: string, token: CotToken): Promise<void> {
+  set(sub: string, token: CotToken): Promise<void> {
     const storage = this.readStorage();
-    storage[ctcId] = token;
+    storage[sub] = token;
     this.writeStorage(storage);
     return Promise.resolve();
   }
 
-  remove(ctcId: string): Promise<void> {
+  remove(sub: string): Promise<void> {
     const storage = this.readStorage();
-    delete storage[ctcId];
+    delete storage[sub];
     this.writeStorage(storage);
     return Promise.resolve();
   }

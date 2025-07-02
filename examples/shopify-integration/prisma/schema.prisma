@@ -32,7 +32,7 @@ model Session {
 }
 
 model CotAuthSession {
-  ctcId        String @id
+  sub        String @id
   idToken      String
   accessToken  String?
   refreshToken String

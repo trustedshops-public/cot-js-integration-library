@@ -10,15 +10,15 @@ export default class InMemoryAuthStorage implements AuthStorageInterface {
     this.db = {};
   }
 
-  async get(ctcId: string): Promise<CotToken | null> {
-    return this.db[ctcId] || null;
+  async get(sub: string): Promise<CotToken | null> {
+    return this.db[sub] || null;
   }
 
-  async set(ctcId: string, token: CotToken): Promise<void> {
-    this.db[ctcId] = token;
+  async set(sub: string, token: CotToken): Promise<void> {
+    this.db[sub] = token;
   }
 
-  async remove(ctcId: string): Promise<void> {
-    delete this.db[ctcId];
+  async remove(sub: string): Promise<void> {
+    delete this.db[sub];
   }
 }
