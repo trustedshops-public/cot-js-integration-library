@@ -1,3 +1,10 @@
+## [1.10.2](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.10.1...1.10.2) (2025-07-02)
+
+
+### Bug Fixes
+
+* add missing strategy attribute to Script component in CotSwitch ([78d118a](https://github.com/trustedshops-public/cot-js-integration-library/commit/78d118ad89842c7d1de4d4b1eb23cb7368d646a6))
+
 ## [1.10.1](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.10.0...1.10.1) (2025-06-30)
 
 
