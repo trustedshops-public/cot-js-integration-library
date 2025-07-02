@@ -1,3 +1,10 @@
+## [1.10.3](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.10.2...1.10.3) (2025-07-02)
+
+
+### Bug Fixes
+
+* use sub in AuthStorageInterface and implementations as primary key ([44e3847](https://github.com/trustedshops-public/cot-js-integration-library/commit/44e384732f9efb211e7cdc14dfa312c352538fb8))
+
 ## [1.10.2](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.10.1...1.10.2) (2025-07-02)
 
 
