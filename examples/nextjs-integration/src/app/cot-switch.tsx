@@ -64,6 +64,7 @@ export default function CotSwitch({ tsid, onAuthenticationChange }: Readonly<Cot
       <Script
         src="https://cdn.trstd-login-test.trstd.com/switch/switch.js"
         type="module"
+        strategy="lazyOnload"
       />
     </>
   );
