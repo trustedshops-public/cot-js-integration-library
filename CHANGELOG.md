@@ -1,3 +1,10 @@
+## [1.10.6](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.10.5...1.10.6) (2025-07-18)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @shopify/polaris to v13 ([#20](https://github.com/trustedshops-public/cot-js-integration-library/issues/20)) ([14e064e](https://github.com/trustedshops-public/cot-js-integration-library/commit/14e064e8eacf153ca83b397f811902d86e66bbb6))
+
 ## [1.10.5](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.10.4...1.10.5) (2025-07-18)
 
 
