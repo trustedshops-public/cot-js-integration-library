@@ -1,3 +1,10 @@
+## [1.10.5](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.10.4...1.10.5) (2025-07-18)
+
+
+### Bug Fixes
+
+* **deps:** update npm ([#47](https://github.com/trustedshops-public/cot-js-integration-library/issues/47)) ([30362ca](https://github.com/trustedshops-public/cot-js-integration-library/commit/30362ca82df5bcb7564c05cda10a896e4994db4b))
+
 ## [1.10.4](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.10.3...1.10.4) (2025-07-10)
 
 
