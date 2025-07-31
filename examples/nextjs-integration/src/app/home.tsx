@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import CotSwitch from "./cot-switch";
-import { AnonymousConsumerData } from "@trustedshops-public/cot-integration-library";
+import { ConsumerData } from "@trustedshops-public/cot-integration-library";
 
 export default function Home() {
-    const [authUser, setAuthUser] = useState<AnonymousConsumerData | null>(null);
+    const [authUser, setAuthUser] = useState<ConsumerData | null>(null);
 
     return (
         <main className="flex flex-col min-h-screen w-full mx-auto max-w-[1920px] p-8">

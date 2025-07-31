@@ -16,7 +16,7 @@ import { CookieHandlerInterface } from "./types/cookie-handler.type";
 import { TokenErrorResponse, TokenResponse } from "./types/token-response.type";
 import { decryptValue, encryptValue } from "./utils/encryption.util";
 import { generateCodeChallenge, generateCodeVerifier } from "./utils/pkce.util";
-import { AnonymousConsumerData } from "./types/anonymous-consumer-data.type";
+import { ConsumerData } from "./types/consumer-data.type";
 
 const ENV_URIS = {
   authServerBaseUri: {
@@ -35,8 +35,8 @@ const IDENTITY_COOKIE_KEY = "TRSTD_ID_TOKEN";
 const CODE_VERIFIER_COOKIE_KEY = "TRSTD_CV";
 const CODE_CHALLENGE_COOKIE_KEY = "TRSTD_CC";
 
-const CONSUMER_ANONYMOUS_DATA_CACHE_KEY = "CONSUMER_ANONYMOUS_DATA_";
-const CONSUMER_ANONYMOUS_DATA_CACHE_TTL = 3600; // 1 hour
+const CONSUMER_DATA_CACHE_KEY = "CONSUMER_DATA_";
+const CONSUMER_DATA_CACHE_TTL = 3600; // 1 hour
 
 export class Client {
   private readonly authServerBaseUri: string;
@@ -125,11 +125,11 @@ export class Client {
   }
 
   /**
-   * Retrieves anonymous consumer data for the current user.
+   * Retrieves consumer data for the current user.
    *
-   * @returns {Promise<AnonymousConsumerData | null>} The anonymous consumer data if available, otherwise null.
+   * @returns {Promise<ConsumerData | null>} The consumer data if available, otherwise null.
    */
-  public async getAnonymousConsumerData(): Promise<AnonymousConsumerData | null> {
+  public async getConsumerData(): Promise<ConsumerData | null> {
     try {
       const idToken = await this.getIdentityCookie();
       if (!idToken) {
@@ -139,29 +139,29 @@ export class Client {
       const accessToken = await this.getOrRefreshAccessToken(idToken);
       const decodedToken = await this.decodeToken(idToken, false);
 
-      const cacheKey = `${CONSUMER_ANONYMOUS_DATA_CACHE_KEY}${decodedToken.sub}`;
-      const cachedConsumerAnonymousDataItem =
-        this.cache.get<AnonymousConsumerData>(cacheKey);
+      const cacheKey = `${CONSUMER_DATA_CACHE_KEY}${decodedToken.sub}`;
+      const cachedConsumerDataItem =
+        this.cache.get<ConsumerData>(cacheKey);
 
-      if (cachedConsumerAnonymousDataItem) {
-        return cachedConsumerAnonymousDataItem;
+      if (cachedConsumerDataItem) {
+        return cachedConsumerDataItem;
       }
 
       const headers = new Headers();
       headers.append("Content-Type", "application/json");
       headers.append("Authorization", `Bearer ${accessToken}`);
 
-      const consumerAnonymousData = await httpClient.get<AnonymousConsumerData>(
-        `${this.resourceServerBaseUri}/anonymous-data${
+      const consumerData = await httpClient.get<ConsumerData>(
+        `${this.resourceServerBaseUri}/consumer-data${
           this.tsId ? `?shopId=${this.tsId}` : ""
         }`,
         headers
       );
 
-      this.cache.set(cacheKey, consumerAnonymousData);
-      this.cache.ttl(cacheKey, CONSUMER_ANONYMOUS_DATA_CACHE_TTL);
+      this.cache.set(cacheKey, consumerData);
+      this.cache.ttl(cacheKey, CONSUMER_DATA_CACHE_TTL);
 
-      return consumerAnonymousData;
+      return consumerData;
     } catch (error) {
       if (error instanceof Error) {
         this.logger?.error(error?.message);
@@ -169,6 +169,8 @@ export class Client {
       return null;
     }
   }
+
+
 
   public setCookieHandler(cookieHandler: CookieHandlerInterface) {
     if (!cookieHandler) {

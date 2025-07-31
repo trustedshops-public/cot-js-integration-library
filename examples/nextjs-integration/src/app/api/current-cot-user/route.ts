@@ -4,7 +4,7 @@ export async function GET(request: Request) {
   const cotClient = await getCotClient();
   cotClient.setRedirectUri(request.url);
 
-  const user = await cotClient.getAnonymousConsumerData();
+  const user = await cotClient.getConsumerData();
 
   return new Response(JSON.stringify(user), {
     headers: {

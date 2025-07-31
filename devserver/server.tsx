@@ -67,7 +67,7 @@ app.get('/*', async (req, res) => {
       req.query.cotAction as ActionType
     );
 
-    const authUser = await client.getAnonymousConsumerData();
+    const authUser = await client.getConsumerData();
 
     const url = req.originalUrl.replace(base, '');
     const template = await vite.transformIndexHtml(url, fs.readFileSync(path.resolve(import.meta.dirname, 'index.html'), 'utf-8'));

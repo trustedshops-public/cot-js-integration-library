@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
 
 import "./App.css";
-import { AnonymousConsumerData } from "../../../src";
+import { ConsumerData } from "../../../src";
 
 declare global {
   interface Window {
-    authUser: AnonymousConsumerData;
+    authUser: ConsumerData;
   }
 }
 
 function App() {
-  const [authUser, setAuthUser] = useState<AnonymousConsumerData>();
+  const [authUser, setAuthUser] = useState<ConsumerData>();
 
   useEffect(() => {
     const authUser = window.authUser;
