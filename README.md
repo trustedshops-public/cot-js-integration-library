@@ -45,8 +45,8 @@ client.setRedirectUri(<REDIRECT_URI>);
 // Invoke handleCallback function to handle code coming from the authentication server
 await client.handleCallback(authCode);
 
-// Get anonymous consumer data for the current user
-const consumerData = await client.getAnonymousConsumerData();
+// Get consumer data for the current user
+const consumerData = await client.getConsumerData();
 ```
 
 On the frontend side, place the following code in your HTML file where you want the widget to appear:

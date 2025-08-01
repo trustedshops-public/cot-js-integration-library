@@ -67,7 +67,7 @@ export const action: ActionFunction = async ({ request, params }: ActionFunction
   }
 
   if (actionValue === "getUserInfo") {
-    return await cotClient.getAnonymousConsumerData();
+    return await cotClient.getConsumerData();
   }
 
   throw new Error("Invalid action");

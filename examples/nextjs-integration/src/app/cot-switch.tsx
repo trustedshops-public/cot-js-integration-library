@@ -4,11 +4,11 @@ import { useEffect, useCallback, useRef } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import Script from "next/script";
 import { handleCotAuthCallback } from "./actions/handle-cot-auth-callback";
-import { AnonymousConsumerData } from "@trustedshops-public/cot-integration-library";
+import { ConsumerData } from "@trustedshops-public/cot-integration-library";
 
 export type CotSwitchProps = {
   tsid: string;
-  onAuthenticationChange?: (authUser: AnonymousConsumerData | null) => void;
+  onAuthenticationChange?: (authUser: ConsumerData | null) => void;
 };
 
 export default function CotSwitch({ tsid, onAuthenticationChange }: Readonly<CotSwitchProps>) {
@@ -20,7 +20,7 @@ export default function CotSwitch({ tsid, onAuthenticationChange }: Readonly<Cot
     try {
       const response = await fetch('/api/current-cot-user');
       if (!response.ok) throw new Error('Failed to fetch current COT user');
-      return (await response.json()) as AnonymousConsumerData | null;
+      return (await response.json()) as ConsumerData | null;
     } catch (error) {
       console.error("Error fetching current COT user:", error);
       return null;
