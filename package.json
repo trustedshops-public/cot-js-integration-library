@@ -1,6 +1,6 @@
 {
     "name": "@trustedshops-public/cot-integration-library",
-    "version": "1.10.13",
+    "version": "1.10.14",
     "private": false,
     "type": "module",
     "main": "dist/index.umd.js",
