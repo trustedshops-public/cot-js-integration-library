@@ -5,6 +5,7 @@ import { RequiredParameterMissingError } from "./errors/required-parameter-missi
 import { AuthStorageInterface } from "./types/auth-storage.type";
 import { ActionType } from "./types/action.type";
 import { CotToken } from "./types/cot-token.type";
+import { Environments } from "./types/env.type";
 
 import {
   TokenNotFoundError,
@@ -52,13 +53,34 @@ export class Client {
   private readonly jwks;
 
   constructor(
+    clientId: string,
+    clientSecret: string,
+    authStorage: AuthStorageInterface,
+    env?: Environments
+  );
+  constructor(
     tsId: string,
     clientId: string,
     clientSecret: string,
     authStorage: AuthStorageInterface,
-    env: "dev" | "test" | "prod" = "prod"
+    env?: Environments
+  );
+  constructor(
+    tsIdOrClientId: string,
+    clientIdOrSecret: string,
+    clientSecretOrStorage: string | AuthStorageInterface,
+    authStorageOrEnv: AuthStorageInterface | Environments = "prod",
+    env: Environments = "prod"
   ) {
-    if (!tsId) {
+    const hasTsId = arguments.length === 5;
+
+    const tsId = hasTsId ? tsIdOrClientId : "";
+    const clientId = hasTsId ? clientIdOrSecret : tsIdOrClientId;
+    const clientSecret = hasTsId ? clientSecretOrStorage as string : clientIdOrSecret;
+    const authStorage = hasTsId ? authStorageOrEnv as AuthStorageInterface : clientSecretOrStorage as AuthStorageInterface;
+    const environment = hasTsId ? env : authStorageOrEnv as Environments;
+
+    if (hasTsId && !tsId) {
       throw new RequiredParameterMissingError("TS ID is required.");
     }
 
@@ -78,8 +100,8 @@ export class Client {
     this.clientId = clientId;
     this.clientSecret = clientSecret;
     this.authStorage = authStorage;
-    this.authServerBaseUri = ENV_URIS.authServerBaseUri[env];
-    this.resourceServerBaseUri = ENV_URIS.resourceServerBaseUri[env];
+    this.authServerBaseUri = ENV_URIS.authServerBaseUri[environment];
+    this.resourceServerBaseUri = ENV_URIS.resourceServerBaseUri[environment];
     this.redirectUri = "";
     this.cache = new NodeCache();
     this.jwks = jose.createRemoteJWKSet(

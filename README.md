@@ -29,7 +29,6 @@ import { Client } from '@trustedshops-public/cot-integration-library';
 
 // Initialize the client with the required parameters once
 const client = new Client(
-    <TSID>, // Trusted Shops ID - e.g. 'X1234567890123456789012345678901'
     <CLIENT_ID>, // Client ID - e.g. 'cot-switch-X1234567890123456789012345678901'
     <CLIENT_SECRET>, // Client Secret - e.g. '1234567890123456789012345678901234567890123456789012345678901234'
     <AUTH_STORAGE_INSTANCE>, // It can be any storage option implementing AuthStorageInterface - e.g. new DatabaseAuthStorage()

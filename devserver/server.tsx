@@ -11,12 +11,11 @@ import 'dotenv/config';
 const port = process.env.PORT || 5174;
 const base = process.env.BASE || '/';
 
-const tsId = process.env.TS_ID || "";
 const clientId = process.env.CLIENT_ID || "";
 const clientSecret = process.env.CLIENT_SECRET || "";
 
-if (!tsId || !clientId || !clientSecret) {
-  console.error("Please set TS_ID, CLIENT_ID and CLIENT_SECRET environment variables.");
+if (!clientId || !clientSecret) {
+  console.error("Please set CLIENT_ID and CLIENT_SECRET environment variables.");
   process.exit(1);
 }
 
@@ -33,7 +32,6 @@ const vite = await createServer({
 app.use(vite.middlewares)
 const authStorage = new InFileAuthStorage(path.resolve(import.meta.dirname, "auth-storage.json"));
 const client = new Client(
-  tsId,
   clientId,
   clientSecret,
   authStorage,
