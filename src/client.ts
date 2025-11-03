@@ -55,7 +55,7 @@ export class Client {
     clientId: string,
     clientSecret: string,
     authStorage: AuthStorageInterface,
-    env: Environment
+    env: Environment = "prod"
   ) {
     if (!clientId) {
       throw new RequiredParameterMissingError("Client ID is required.");
