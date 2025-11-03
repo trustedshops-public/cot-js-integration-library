@@ -5,7 +5,7 @@ import { RequiredParameterMissingError } from "./errors/required-parameter-missi
 import { AuthStorageInterface } from "./types/auth-storage.type";
 import { ActionType } from "./types/action.type";
 import { CotToken } from "./types/cot-token.type";
-import { Environments } from "./types/env.type";
+import { Environment } from "./types/env.type";
 
 import {
   TokenNotFoundError,
@@ -42,7 +42,6 @@ const CONSUMER_DATA_CACHE_TTL = 3600; // 1 hour
 export class Client {
   private readonly authServerBaseUri: string;
   private readonly resourceServerBaseUri: string;
-  private readonly tsId: string;
   private readonly clientId: string;
   private readonly clientSecret: string;
   private redirectUri: string;
@@ -56,34 +55,8 @@ export class Client {
     clientId: string,
     clientSecret: string,
     authStorage: AuthStorageInterface,
-    env?: Environments
-  );
-  constructor(
-    tsId: string,
-    clientId: string,
-    clientSecret: string,
-    authStorage: AuthStorageInterface,
-    env?: Environments
-  );
-  constructor(
-    tsIdOrClientId: string,
-    clientIdOrSecret: string,
-    clientSecretOrStorage: string | AuthStorageInterface,
-    authStorageOrEnv: AuthStorageInterface | Environments = "prod",
-    env: Environments = "prod"
+    env: Environment
   ) {
-    const hasTsId = arguments.length === 5;
-
-    const tsId = hasTsId ? tsIdOrClientId : "";
-    const clientId = hasTsId ? clientIdOrSecret : tsIdOrClientId;
-    const clientSecret = hasTsId ? clientSecretOrStorage as string : clientIdOrSecret;
-    const authStorage = hasTsId ? authStorageOrEnv as AuthStorageInterface : clientSecretOrStorage as AuthStorageInterface;
-    const environment = hasTsId ? env : authStorageOrEnv as Environments;
-
-    if (hasTsId && !tsId) {
-      throw new RequiredParameterMissingError("TS ID is required.");
-    }
-
     if (!clientId) {
       throw new RequiredParameterMissingError("Client ID is required.");
     }
@@ -96,12 +69,11 @@ export class Client {
       throw new RequiredParameterMissingError("AuthStorage is required.");
     }
 
-    this.tsId = tsId;
     this.clientId = clientId;
     this.clientSecret = clientSecret;
     this.authStorage = authStorage;
-    this.authServerBaseUri = ENV_URIS.authServerBaseUri[environment];
-    this.resourceServerBaseUri = ENV_URIS.resourceServerBaseUri[environment];
+    this.authServerBaseUri = ENV_URIS.authServerBaseUri[env];
+    this.resourceServerBaseUri = ENV_URIS.resourceServerBaseUri[env];
     this.redirectUri = "";
     this.cache = new NodeCache();
     this.jwks = jose.createRemoteJWKSet(
@@ -174,9 +146,7 @@ export class Client {
       headers.append("Authorization", `Bearer ${accessToken}`);
 
       const consumerData = await httpClient.get<ConsumerData>(
-        `${this.resourceServerBaseUri}/consumer-data${
-          this.tsId ? `?shopId=${this.tsId}` : ""
-        }`,
+        `${this.resourceServerBaseUri}/consumer-data`,
         headers
       );
 
