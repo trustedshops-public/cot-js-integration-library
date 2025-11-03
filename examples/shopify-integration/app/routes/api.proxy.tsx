@@ -8,7 +8,6 @@ import PrismaAuthStorage from "../cot/prisma-authstorage";
 
 type PostAction = "getTokens" | "exchangeCode" | "getUserInfo";
 
-const tsId = process.env.TS_ID || "";
 const clientId = process.env.CLIENT_ID || "";
 const clientSecret = process.env.CLIENT_SECRET || "";
 
@@ -34,7 +33,6 @@ export const action: ActionFunction = async ({ request, params }: ActionFunction
   const actionValue = body.action as PostAction;
 
   const cotClient = new Client(
-    tsId,
     clientId,
     clientSecret,
     new PrismaAuthStorage(),

@@ -5,6 +5,7 @@ import { RequiredParameterMissingError } from "./errors/required-parameter-missi
 import { AuthStorageInterface } from "./types/auth-storage.type";
 import { ActionType } from "./types/action.type";
 import { CotToken } from "./types/cot-token.type";
+import { Environment } from "./types/env.type";
 
 import {
   TokenNotFoundError,
@@ -41,7 +42,6 @@ const CONSUMER_DATA_CACHE_TTL = 3600; // 1 hour
 export class Client {
   private readonly authServerBaseUri: string;
   private readonly resourceServerBaseUri: string;
-  private readonly tsId: string;
   private readonly clientId: string;
   private readonly clientSecret: string;
   private redirectUri: string;
@@ -52,16 +52,11 @@ export class Client {
   private readonly jwks;
 
   constructor(
-    tsId: string,
     clientId: string,
     clientSecret: string,
     authStorage: AuthStorageInterface,
-    env: "dev" | "test" | "prod" = "prod"
+    env: Environment = "prod"
   ) {
-    if (!tsId) {
-      throw new RequiredParameterMissingError("TS ID is required.");
-    }
-
     if (!clientId) {
       throw new RequiredParameterMissingError("Client ID is required.");
     }
@@ -74,7 +69,6 @@ export class Client {
       throw new RequiredParameterMissingError("AuthStorage is required.");
     }
 
-    this.tsId = tsId;
     this.clientId = clientId;
     this.clientSecret = clientSecret;
     this.authStorage = authStorage;
@@ -152,9 +146,7 @@ export class Client {
       headers.append("Authorization", `Bearer ${accessToken}`);
 
       const consumerData = await httpClient.get<ConsumerData>(
-        `${this.resourceServerBaseUri}/consumer-data${
-          this.tsId ? `?shopId=${this.tsId}` : ""
-        }`,
+        `${this.resourceServerBaseUri}/consumer-data`,
         headers
       );
 
