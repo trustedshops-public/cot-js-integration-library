@@ -1,4 +1,4 @@
-<trstd-switch tsId="X832CCBC339C1B6586599463D3C2C5DF5" style="font-size: 9px; padding: 5px;"></trstd-switch>
+<trstd-login tsId="X832CCBC339C1B6586599463D3C2C5DF5" style="font-size: 9px; padding: 5px;"></trstd-login>
 <script>
   const getCookie = (name) =>
     document.cookie.replace(new RegExp(`(?:(?:^|.*;\\s*)${name}\\s*=\\s*([^;]*).*$)|^.*$`), '$1');
@@ -62,10 +62,10 @@
       .then((res) => res.json())
       .then((res) => setCOTCookies(res.cookies));
 
-  const appendSwitchScript = () => {
+  const appendTrstdLoginScript = () => {
     const script = document.createElement('script');
     script.type = 'module';
-    script.src = 'https://cdn.trstd-login.trstd.com/switch/switch.js';
+    script.src = 'https://cdn.trstd-login.trstd.com/trstd-login/script.js';
     document.body.appendChild(script);
   };
 
@@ -74,15 +74,15 @@
   const redirectUri = window.location.href;
 
   if (code) {
-    post('exchangeCode', { code, redirectUri }).then(() => appendSwitchScript());
+    post('exchangeCode', { code, redirectUri }).then(() => appendTrstdLoginScript());
   } else {
-    post('getTokens').then(() => appendSwitchScript());
+    post('getTokens').then(() => appendTrstdLoginScript());
   }
 </script>
 
 {% schema %}
 {
-  "name": "COT Switch",
+  "name": "trstd login",
   "target": "section"
 }
 {% endschema %}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import CotSwitch from "./cot-switch";
+import TrstdLogin from "./trstd-login";
 import { ConsumerData } from "@trustedshops-public/cot-integration-library";
 
 export default function Home() {
@@ -13,7 +13,7 @@ export default function Home() {
                 <h1 className="text-4xl font-extrabold tracking-tight">
                     My Store
                 </h1>
-                <CotSwitch
+                <TrstdLogin
                     tsid="X832CCBC339C1B6586599463D3C2C5DF5"
                     onAuthenticationChange={setAuthUser}
                 />
@@ -36,7 +36,7 @@ export default function Home() {
                     <pre className="bg-indigo-50 rounded-lg p-6 text-base text-gray-800 overflow-x-auto border border-indigo-100 transition-colors duration-300 text-wrap">
                         {authUser
                             ? JSON.stringify(authUser, null, 2)
-                            : "No user data available. Please log in using the Switch and refresh the page."}
+                            : "No user data available. Please log in using the trstd login and refresh the page."}
                     </pre>
                 </div>
             </section>
