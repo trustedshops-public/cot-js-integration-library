@@ -51,8 +51,8 @@ const consumerData = await client.getConsumerData();
 On the frontend side, place the following code in your HTML file where you want the widget to appear:
 
 ```html
-<trstd-switch tsId="X1234567890123456789012345678901"></trstd-switch>
-<script type="module" src="https://cdn.trstd-login.trstd.com/switch/switch.js"></script>
+<trstd-login tsId="X1234567890123456789012345678901"></trstd-login>
+<script type="module" src="https://cdn.trstd-login.trstd.com/trstd-login/script.js"></script>
 ```
 
 For more detailed examples, please refer to the [`examples/`](./examples/) directory.

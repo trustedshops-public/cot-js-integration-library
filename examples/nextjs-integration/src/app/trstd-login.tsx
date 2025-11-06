@@ -6,15 +6,15 @@ import Script from "next/script";
 import { handleCotAuthCallback } from "./actions/handle-cot-auth-callback";
 import { ConsumerData } from "@trustedshops-public/cot-integration-library";
 
-export type CotSwitchProps = {
+export type TrstdLoginProps = {
   tsid: string;
   onAuthenticationChange?: (authUser: ConsumerData | null) => void;
 };
 
-export default function CotSwitch({ tsid, onAuthenticationChange }: Readonly<CotSwitchProps>) {
+export default function TrstdLogin({ tsid, onAuthenticationChange }: Readonly<TrstdLoginProps>) {
   const searchParams = useSearchParams();
   const path = usePathname();
-  const switchElementRef = useRef<HTMLElement>(null);
+  const trstdLoginElementRef = useRef<HTMLElement>(null);
 
   const getCurrentCotUser = useCallback(async () => {
     try {
@@ -36,7 +36,7 @@ export default function CotSwitch({ tsid, onAuthenticationChange }: Readonly<Cot
     });
   }, [searchParams, path]);
 
-  // Handle switch.auth events
+  // Handle trstd-login.auth events
   useEffect(() => {
     const handleAuthEvents = async (event: Event) => {
       const { detail } = event as CustomEvent;
@@ -50,19 +50,19 @@ export default function CotSwitch({ tsid, onAuthenticationChange }: Readonly<Cot
       }
     };
 
-    const switchElement = switchElementRef.current;
-    if (switchElement) switchElement.addEventListener("switch.auth", handleAuthEvents);
+    const trstdLoginElement = trstdLoginElementRef.current;
+    if (trstdLoginElement) trstdLoginElement.addEventListener("trstd-login.auth", handleAuthEvents);
 
     return () => {
-      if (switchElement) switchElement.removeEventListener("switch.auth", handleAuthEvents);
+      if (trstdLoginElement) trstdLoginElement.removeEventListener("trstd-login.auth", handleAuthEvents);
     };
   }, [getCurrentCotUser, onAuthenticationChange]);
 
   return (
     <>
-      <trstd-switch ref={switchElementRef} tsid={tsid}></trstd-switch>
+      <trstd-login ref={trstdLoginElementRef} tsid={tsid}></trstd-login>
       <Script
-        src="https://cdn.trstd-login-test.trstd.com/switch/switch.js"
+        src="https://cdn.trstd-login-test.trstd.com/trstd-login/script.js"
         type="module"
         strategy="lazyOnload"
       />
