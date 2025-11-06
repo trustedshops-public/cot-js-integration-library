@@ -1,3 +1,11 @@
+# [1.11.0](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.10.14...1.11.0) (2025-11-06)
+
+
+### Features
+
+* create constructor without tsid ([#73](https://github.com/trustedshops-public/cot-js-integration-library/issues/73)) ([c757452](https://github.com/trustedshops-public/cot-js-integration-library/commit/c75745248a8bc05d4f99df138a91a342c35f7bd4))
+* **SW-758:** Replace `trstd-switch` with `trstd-login` across all usage and references. ([#76](https://github.com/trustedshops-public/cot-js-integration-library/issues/76)) ([c3aef6a](https://github.com/trustedshops-public/cot-js-integration-library/commit/c3aef6acf27297be355a4886416ed250ddd69488))
+
 ## [1.10.14](https://github.com/trustedshops-public/cot-js-integration-library/compare/1.10.13...1.10.14) (2025-09-22)
 
 
