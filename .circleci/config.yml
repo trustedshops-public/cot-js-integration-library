@@ -1,12 +1,12 @@
 version: 2.1
 
 orbs:
-  semantic-release: trustedshops-public/semantic-release@6.0.0
+  semantic-release: trustedshops-public/semantic-release@6.1.0
 
 executors:
   node:
     docker:
-      - image: cimg/node:22.20.0
+      - image: cimg/node:22.21.1
     resource_class: small
 
 filters-all: &filters-all
