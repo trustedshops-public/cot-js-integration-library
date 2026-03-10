@@ -25,6 +25,11 @@ app.use(cookieParser());
 const vite = await createServer({
   server: {
     middlewareMode: true,
+    hmr: {
+      protocol: 'wss',
+      host: 'localhost',
+      port: 5174,
+    },
   },
   appType: 'custom',
   base,
