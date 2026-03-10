@@ -494,7 +494,17 @@ export class Client {
     );
 
     if (encryptedCodeVerifier) {
-      return decryptValue(this.clientSecret, encryptedCodeVerifier);
+      try {
+        return decryptValue(this.clientSecret, encryptedCodeVerifier);
+      } catch (error) {
+        this.logger?.debug(
+          `Invalid code verifier cookie detected: ${
+            error instanceof Error ? error.message : error
+          }`
+        );
+        await this.cookieHandler?.remove(CODE_VERIFIER_COOKIE_KEY);
+        await this.cookieHandler?.remove(CODE_CHALLENGE_COOKIE_KEY);
+      }
     }
 
     return null;
