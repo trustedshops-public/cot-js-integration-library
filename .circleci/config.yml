@@ -43,6 +43,16 @@ jobs:
     executor: node
     steps:
       - checkout
+      - run:
+          name: Print runtime versions
+          command: |
+            node --version
+            npm --version
+      - run:
+          name: Pin npm version
+          command: |
+            npm install -g npm@11.3.0
+            npm --version
       - restore_cache:
           key: npm-packages-{{ checksum "package-lock.json" }}
       - run: npm ci
