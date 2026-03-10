@@ -323,6 +323,9 @@ export class Client {
         if (error instanceof jose.errors.JWTExpired) {
           this.logger?.debug("access token is expired. refreshing...");
           shouldRefresh = true;
+        } else if (error instanceof TokenInvalidError) {
+          this.logger?.error(`Invalid access token format: ${error.message}`);
+          shouldRefresh = true;
         } else {
           if (error instanceof Error) {
             this.logger?.error(error.message);
