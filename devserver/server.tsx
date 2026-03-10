@@ -19,12 +19,24 @@ if (!clientId || !clientSecret) {
   process.exit(1);
 }
 
+const keyPath = path.resolve(import.meta.dirname, "../certs/localhost-key.pem");
+const certPath = path.resolve(import.meta.dirname, "../certs/localhost.pem");
+
+if (!fs.existsSync(keyPath) || !fs.existsSync(certPath)) {
+  console.error("SSL certificates not found. Run 'npm run generate-ssl-cert' first.");
+  process.exit(1);
+}
+
 // Create vite server
 const app = express();
 app.use(cookieParser());
 const vite = await createServer({
   server: {
     middlewareMode: true,
+    https: {
+      key: fs.readFileSync(keyPath),
+      cert: fs.readFileSync(certPath),
+    },
     hmr: {
       protocol: 'wss',
       host: 'localhost',
@@ -93,12 +105,8 @@ app.get('/*', async (req, res) => {
 
 // Create HTTPS server
 https.createServer({
-  key: fs.existsSync(path.resolve(import.meta.dirname, "../certs/localhost-key.pem"))
-    ? fs.readFileSync(path.resolve(import.meta.dirname, "../certs/localhost-key.pem"))
-    : undefined,
-  cert: fs.existsSync(path.resolve(import.meta.dirname, "../certs/localhost.pem"))
-    ? fs.readFileSync(path.resolve(import.meta.dirname, "../certs/localhost.pem"))
-    : undefined,
+  key: fs.readFileSync(keyPath),
+  cert: fs.readFileSync(certPath),
 }, app).listen(port, () => {
   console.log(`Server started at https://localhost:${port}`);
 });
