@@ -200,9 +200,20 @@ export class Client {
   private async disconnect(): Promise<void> {
     const idToken = await this.getIdentityCookie();
     if (idToken) {
-      const decodedToken = await this.decodeToken(idToken, false);
-      this.authStorage.remove(decodedToken.sub);
-      this.removeIdentityCookie();
+      try {
+        const decodedToken = await this.decodeToken(idToken, false);
+        this.authStorage.remove(decodedToken.sub);
+        this.removeIdentityCookie();
+      } catch (error) {
+        if (error instanceof TokenInvalidError) {
+          this.logger?.debug(
+            `Invalid token detected during disconnect: ${error.message}`
+          );
+          this.removeIdentityCookie();
+        } else {
+          throw error;
+        }
+      }
     }
   }
 
@@ -337,6 +348,8 @@ export class Client {
     try {
       const decodedToken = await this.decodeToken(token.idToken, false);
       this.authStorage.set(decodedToken.sub, token);
+      // Update identity cookie when tokens are refreshed
+      await this.setIdentityCookie(token.idToken);
     } catch (error) {
       if (error instanceof jose.errors.JWTExpired) {
         this.logger?.debug("id token is expired. returning...");
@@ -373,9 +386,41 @@ export class Client {
     return null;
   }
 
+  /**
+   * Validates if the provided token string is in valid JWT format.
+   * Checks if the token has exactly 3 parts separated by dots and has a non-empty payload.
+   *
+   * @param token - The JWT token string to validate
+   * @returns true if token is in valid JWT format, false otherwise
+   */
+  private isValidJwtFormat(token: string): boolean {
+    if (!token || typeof token !== "string") {
+      return false;
+    }
+
+    const parts = token.split(".");
+
+    // JWT should have exactly 3 parts: header.payload.signature
+    if (parts.length !== 3) {
+      return false;
+    }
+
+    // Check if payload (second part) is not empty
+    if (!parts[1] || parts[1].trim() === "") {
+      return false;
+    }
+
+    return true;
+  }
+
   private async decodeToken(token: string, validateExp = true) {
     if (!token) {
       throw new TokenInvalidError("Token cannot be empty or null.");
+    }
+
+    // Validate JWT format before attempting to decode
+    if (!this.isValidJwtFormat(token)) {
+      throw new TokenInvalidError("Token is not in valid JWT format.");
     }
 
     if (!validateExp) {
