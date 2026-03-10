@@ -355,7 +355,6 @@ export class Client {
               `Error occurred while refreshing the token: ${error.message}`,
             );
           }
-          this.removeIdentityCookie();
           throw error;
         }
       }
