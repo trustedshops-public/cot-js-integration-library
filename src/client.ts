@@ -306,9 +306,6 @@ export class Client {
     const token = await this.getTokenFromStorage(idToken);
 
     if (token) {
-      // Keep identity cookie in sync with the latest token available in storage.
-      await this.setIdentityCookie(token.idToken);
-
       let shouldRefresh = false;
 
       try {
@@ -337,6 +334,23 @@ export class Client {
         }
       }
 
+      // If access token is valid, also check if ID token is expired or invalid
+      // to ensure the cookie always contains a fresh ID token
+      if (!shouldRefresh) {
+        try {
+          const decodedIdToken = await this.decodeToken(token.idToken, false);
+          if (decodedIdToken.exp && decodedIdToken.exp < Math.floor(Date.now() / 1000)) {
+            this.logger?.debug("ID token is expired. Refreshing to update cookie...");
+            shouldRefresh = true;
+          }
+        } catch (error) {
+          if (error instanceof TokenInvalidError) {
+            this.logger?.debug("ID token format is invalid. Refreshing to update cookie...");
+            shouldRefresh = true;
+          }
+        }
+      }
+
       if (shouldRefresh) {
         try {
           const refreshedToken = await this.getRefreshedToken(
@@ -354,7 +368,7 @@ export class Client {
           token.accessToken = refreshedToken.accessToken;
 
           await this.setTokenOnStorage(token);
-          this.logger?.debug("Access token is refreshed. returning...");
+          this.logger?.debug("Tokens refreshed. ID token cookie updated.");
 
           return token.accessToken;
         } catch (error) {
@@ -466,11 +480,7 @@ export class Client {
   }
 
   private async handleAuthCode(code: string): Promise<void> {
-    const token = await this.connect(code);
-
-    if (token) {
-      await this.setIdentityCookie(token.idToken);
-    }
+    await this.connect(code);
   }
 
   private async handleAction(actionType: ActionType): Promise<void> {

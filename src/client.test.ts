@@ -240,7 +240,7 @@ describe("Client", () => {
   });
 
   describe("getOrRefreshAccessToken", () => {
-    it("should update identity cookie when using valid token from storage", async () => {
+    it("should not update identity cookie when tokens are valid", async () => {
       const subject = "test-user-790";
       const storedIdToken = `header.${Buffer.from(
         JSON.stringify({ sub: subject, iat: Date.now() })
@@ -262,11 +262,7 @@ describe("Client", () => {
       );
 
       expect(accessToken).toBe("stored-access-token");
-      expect(mockCookieHandler.set).toHaveBeenCalledWith(
-        "TRSTD_ID_TOKEN",
-        storedIdToken,
-        expect.any(Date)
-      );
+      expect(mockCookieHandler.set).not.toHaveBeenCalled();
     });
 
     it("should update identity cookie with refreshed id token", async () => {
