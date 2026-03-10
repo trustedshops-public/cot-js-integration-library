@@ -10,6 +10,7 @@ import 'dotenv/config';
 
 const port = process.env.PORT || 5174;
 const base = process.env.BASE || '/';
+const debugAuthCookies = process.env.DEBUG_AUTH_COOKIES === 'true';
 
 const clientId = process.env.CLIENT_ID || "";
 const clientSecret = process.env.CLIENT_SECRET || "";
@@ -57,27 +58,76 @@ const client = new Client(
   "test"
 );
 
+const getJwtSub = (token?: string): string | null => {
+  if (!token) {
+    return null;
+  }
+
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3 || !parts[1]) {
+      return null;
+    }
+
+    const payload = JSON.parse(
+      Buffer.from(parts[1].replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf-8')
+    ) as { sub?: string };
+
+    return payload.sub ?? null;
+  } catch {
+    return null;
+  }
+};
+
 // Serve HTML
 app.get('/{*path}', async (req, res) => {
   try {
+    // Keep a request-scoped cookie state so backend reads reflect cookies set earlier in this same request.
+    const requestCookies: Record<string, string | undefined> = { ...req.cookies };
+
     const cookieHandler: CookieHandlerInterface = {
       get: (key: string) => {
-        return req.cookies[key];
+        return Promise.resolve(requestCookies[key]);
       },
       set: (key: string, value: string, expireDatetime?: Date) => {
+        requestCookies[key] = value;
         res.cookie(key, value, {
           expires: expireDatetime,
-          secure: true,
+          secure: req.protocol === 'https',
+          sameSite: 'lax',
+          httpOnly: true,
+          path: '/',
         });
         return Promise.resolve();
       },
       remove: (key: string) => {
-        res.clearCookie(key);
+        delete requestCookies[key];
+        res.clearCookie(key, {
+          secure: req.protocol === 'https',
+          sameSite: 'lax',
+          httpOnly: true,
+          path: '/',
+        });
         return Promise.resolve();
       },
     };
     client.setCookieHandler(cookieHandler);
     client.setRedirectUri(`${req.protocol}://${req.get('host')}${req.originalUrl}`);
+
+    if (debugAuthCookies) {
+      const incomingSub = getJwtSub(requestCookies.TRSTD_ID_TOKEN);
+      const hasStoredTokenForIncomingIdToken = incomingSub
+        ? Boolean(await authStorage.get(incomingSub))
+        : false;
+
+      console.log('[auth-debug] incoming request', {
+        path: req.originalUrl,
+        hasIdToken: Boolean(requestCookies.TRSTD_ID_TOKEN),
+        hasCodeVerifier: Boolean(requestCookies.TRSTD_CV),
+        hasCodeChallenge: Boolean(requestCookies.TRSTD_CC),
+        hasStoredTokenForIncomingIdToken,
+      });
+    }
 
     await client.handleCallback(
       req.query.code as string,
@@ -85,6 +135,22 @@ app.get('/{*path}', async (req, res) => {
     );
 
     const authUser = await client.getConsumerData();
+
+    if (debugAuthCookies) {
+      const currentSub = getJwtSub(requestCookies.TRSTD_ID_TOKEN);
+      const hasStoredTokenForCurrentIdToken = currentSub
+        ? Boolean(await authStorage.get(currentSub))
+        : false;
+
+      console.log('[auth-debug] backend state after auth/data', {
+        path: req.originalUrl,
+        hasIdToken: Boolean(requestCookies.TRSTD_ID_TOKEN),
+        hasCodeVerifier: Boolean(requestCookies.TRSTD_CV),
+        hasCodeChallenge: Boolean(requestCookies.TRSTD_CC),
+        hasAuthUser: Boolean(authUser),
+        hasStoredTokenForCurrentIdToken,
+      });
+    }
 
     const url = req.originalUrl.replace(base, '');
     const template = await vite.transformIndexHtml(url, fs.readFileSync(path.resolve(import.meta.dirname, 'index.html'), 'utf-8'));
@@ -98,9 +164,10 @@ app.get('/{*path}', async (req, res) => {
 
     res.status(200).set({ 'Content-Type': 'text/html' }).send(html);
   } catch (e) {
-    vite?.ssrFixStacktrace(e);
-    console.log(e.stack);
-    res.status(500).end(e.stack);
+    const err = e instanceof Error ? e : new Error(String(e));
+    vite?.ssrFixStacktrace(err);
+    console.log(err.stack);
+    res.status(500).end(err.stack);
   }
 });
 
