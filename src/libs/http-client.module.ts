@@ -9,16 +9,13 @@ type BodyInit =
   | null
   | string;
 
-type HeadersInit =
-  | string[][]
-  | Record<string, string | ReadonlyArray<string>>
-  | Headers;
+type HeadersInit = [string, string][] | Record<string, string> | Headers;
 
 const request = async <TRESPONSE, TBODY extends BodyInit | undefined>(
   method: string,
   url: string,
   body?: TBODY,
-  headers?: HeadersInit
+  headers?: HeadersInit,
 ): Promise<TRESPONSE> => {
   const response = await fetch(url, {
     method,
@@ -40,7 +37,7 @@ const get = <TRESPONSE>(url: string, headers?: any) => {
 const post = <TRESPONSE, TBODY extends BodyInit>(
   url: string,
   body: TBODY,
-  headers?: any
+  headers?: any,
 ) => {
   return request<TRESPONSE, TBODY>("POST", url, body, headers);
 };
@@ -48,7 +45,7 @@ const post = <TRESPONSE, TBODY extends BodyInit>(
 const put = <TRESPONSE, TBODY extends BodyInit>(
   url: string,
   body: any,
-  headers?: any
+  headers?: any,
 ) => {
   return request<TRESPONSE, TBODY>("PUT", url, body, headers);
 };
