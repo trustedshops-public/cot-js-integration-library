@@ -224,12 +224,18 @@ describe("Client", () => {
       );
     });
 
-    it("should handle TokenInvalidError when setting invalid token", async () => {
+    it("should set identity cookie even when token format is invalid", async () => {
       const invalidToken = new CotToken("invalid.token", "refresh", "access");
 
-      await expect(
-        callPrivateMethod(client, "setTokenOnStorage", invalidToken)
-      ).rejects.toThrow();
+      // Should not throw - cookie should be set even if storage fails
+      await callPrivateMethod(client, "setTokenOnStorage", invalidToken);
+
+      // Verify cookie was set despite invalid token
+      expect(mockCookieHandler.set).toHaveBeenCalledWith(
+        "TRSTD_ID_TOKEN",
+        "invalid.token",
+        expect.any(Date)
+      );
     });
   });
 

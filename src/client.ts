@@ -377,14 +377,18 @@ export class Client {
   }
 
   private async setTokenOnStorage(token: CotToken): Promise<void> {
+    // Always set the identity cookie first, regardless of storage success
+    // This ensures the frontend is updated even if token storage fails
+    await this.setIdentityCookie(token.idToken);
+
     try {
       const decodedToken = await this.decodeToken(token.idToken, false);
       this.authStorage.set(decodedToken.sub, token);
-      // Update identity cookie when tokens are refreshed
-      await this.setIdentityCookie(token.idToken);
     } catch (error) {
       if (error instanceof jose.errors.JWTExpired) {
         this.logger?.debug("id token is expired. returning...");
+      } else if (error instanceof TokenInvalidError) {
+        this.logger?.error(`Invalid token format: ${error.message}`);
       } else {
         if (error instanceof Error) {
           this.logger?.error(error.message);
