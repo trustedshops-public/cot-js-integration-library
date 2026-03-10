@@ -385,9 +385,7 @@ export class Client {
       const decodedToken = await this.decodeToken(token.idToken, false);
       this.authStorage.set(decodedToken.sub, token);
     } catch (error) {
-      if (error instanceof jose.errors.JWTExpired) {
-        this.logger?.debug("id token is expired. returning...");
-      } else if (error instanceof TokenInvalidError) {
+      if (error instanceof TokenInvalidError) {
         this.logger?.error(`Invalid token format: ${error.message}`);
       } else {
         if (error instanceof Error) {
@@ -406,8 +404,8 @@ export class Client {
       const decodedToken = await this.decodeToken(idToken, false);
       return this.authStorage.get(decodedToken.sub);
     } catch (error) {
-      if (error instanceof jose.errors.JWTExpired) {
-        this.logger?.debug("id token is expired. returning...");
+      if (error instanceof TokenInvalidError) {
+        this.logger?.error(`Invalid token format: ${error.message}`);
       } else {
         if (error instanceof Error) {
           this.logger?.error(error.message);
