@@ -27,27 +27,28 @@ if (!fs.existsSync(keyPath) || !fs.existsSync(certPath)) {
   process.exit(1);
 }
 
-// Create vite server
+// Create express app
 const app = express();
 app.use(cookieParser());
+
+// Create vite server in middleware mode
 const vite = await createServer({
   server: {
     middlewareMode: true,
-    https: {
-      key: fs.readFileSync(keyPath),
-      cert: fs.readFileSync(certPath),
-    },
     hmr: {
       protocol: 'wss',
-      host: 'localhost',
+      host: '127.0.0.1',
       port: 5174,
     },
   },
   appType: 'custom',
   base,
   root: path.resolve(import.meta.dirname),
-})
-app.use(vite.middlewares)
+});
+
+// Add vite middleware
+app.use(vite.middlewares);
+
 const authStorage = new InFileAuthStorage(path.resolve(import.meta.dirname, "auth-storage.json"));
 const client = new Client(
   clientId,
@@ -101,7 +102,7 @@ app.get('/*', async (req, res) => {
     console.log(e.stack);
     res.status(500).end(e.stack);
   }
-})
+});
 
 // Create HTTPS server
 https.createServer({
