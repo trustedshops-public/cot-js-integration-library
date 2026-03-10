@@ -39,7 +39,7 @@ const client = new Client(
 );
 
 // Serve HTML
-app.get('/*', async (req, res) => {
+app.get('/{*path}', async (req, res) => {
   try {
     const cookieHandler: CookieHandlerInterface = {
       get: (key: string) => {
