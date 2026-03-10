@@ -49,13 +49,12 @@ jobs:
             node --version
             npm --version
       - run:
-          name: Pin npm version
+          name: Print pinned npm version
           command: |
-            npm install -g npm@11.3.0
-            npm --version
+            npx --yes npm@11.3.0 --version
       - restore_cache:
           key: npm-packages-{{ checksum "package-lock.json" }}
-      - run: npm ci
+      - run: npx --yes npm@11.3.0 ci
       - save_cache:
           key: npm-packages-{{ checksum "package-lock.json" }}
           paths:
