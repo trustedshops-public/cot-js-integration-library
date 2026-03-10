@@ -130,7 +130,7 @@ describe("Client", () => {
 
   describe("getIdentityCookie", () => {
     it("should return null when cookie handler returns null", async () => {
-      vi.mocked(mockCookieHandler.get).mockResolvedValue(null);
+      vi.mocked(mockCookieHandler.get).mockResolvedValue(undefined);
       const result = await callPrivateMethod(client, "getIdentityCookie");
       expect(result).toBeNull();
     });
@@ -196,7 +196,7 @@ describe("Client", () => {
     });
 
     it("should not attempt to remove if cookie is null", async () => {
-      vi.mocked(mockCookieHandler.get).mockResolvedValue(null);
+      vi.mocked(mockCookieHandler.get).mockResolvedValue(undefined);
 
       await callPrivateMethod(client, "disconnect");
 
@@ -230,6 +230,78 @@ describe("Client", () => {
       await expect(
         callPrivateMethod(client, "setTokenOnStorage", invalidToken)
       ).rejects.toThrow();
+    });
+  });
+
+  describe("getOrRefreshAccessToken", () => {
+    it("should update identity cookie when using valid token from storage", async () => {
+      const subject = "test-user-790";
+      const storedIdToken = `header.${Buffer.from(
+        JSON.stringify({ sub: subject, iat: Date.now() })
+      ).toString("base64")}.signature`;
+
+      const storedToken = new CotToken(
+        storedIdToken,
+        "stored-refresh-token",
+        "stored-access-token"
+      );
+
+      vi.spyOn(client as any, "getTokenFromStorage").mockResolvedValue(storedToken);
+      vi.spyOn(client as any, "decodeToken").mockResolvedValue({ sub: subject });
+
+      const accessToken = await callPrivateMethod(
+        client,
+        "getOrRefreshAccessToken",
+        "incoming-cookie-token"
+      );
+
+      expect(accessToken).toBe("stored-access-token");
+      expect(mockCookieHandler.set).toHaveBeenCalledWith(
+        "TRSTD_ID_TOKEN",
+        storedIdToken,
+        expect.any(Date)
+      );
+    });
+
+    it("should update identity cookie with refreshed id token", async () => {
+      const subject = "test-user-789";
+      const oldIdToken = `header.${Buffer.from(
+        JSON.stringify({ sub: subject, iat: Date.now() })
+      ).toString("base64")}.signature`;
+      const newIdToken = `header.${Buffer.from(
+        JSON.stringify({ sub: subject, iat: Date.now() + 1 })
+      ).toString("base64")}.signature`;
+
+      const storedToken = new CotToken(oldIdToken, "old-refresh-token");
+      const refreshedToken = new CotToken(
+        newIdToken,
+        "new-refresh-token",
+        "new-access-token"
+      );
+
+      vi.spyOn(client as any, "getTokenFromStorage").mockResolvedValue(storedToken);
+      vi.spyOn(client as any, "getRefreshedToken").mockResolvedValue(refreshedToken);
+
+      const accessToken = await callPrivateMethod(
+        client,
+        "getOrRefreshAccessToken",
+        oldIdToken
+      );
+
+      expect(accessToken).toBe("new-access-token");
+      expect(mockCookieHandler.set).toHaveBeenCalledWith(
+        "TRSTD_ID_TOKEN",
+        newIdToken,
+        expect.any(Date)
+      );
+      expect(mockAuthStorage.set).toHaveBeenCalledWith(
+        subject,
+        expect.objectContaining({
+          idToken: newIdToken,
+          refreshToken: "new-refresh-token",
+          accessToken: "new-access-token",
+        })
+      );
     });
   });
 });

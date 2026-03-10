@@ -55,7 +55,7 @@ export class Client {
     clientId: string,
     clientSecret: string,
     authStorage: AuthStorageInterface,
-    env: Environment = "prod"
+    env: Environment = "prod",
   ) {
     if (!clientId) {
       throw new RequiredParameterMissingError("Client ID is required.");
@@ -77,13 +77,13 @@ export class Client {
     this.redirectUri = "";
     this.cache = new NodeCache();
     this.jwks = jose.createRemoteJWKSet(
-      new URL(`${this.authServerBaseUri}/certs`)
+      new URL(`${this.authServerBaseUri}/certs`),
     );
   }
 
   public async handleCallback(
     code?: string,
-    cotAction?: ActionType
+    cotAction?: ActionType,
   ): Promise<void> {
     if (code) {
       await this.handleAuthCode(code);
@@ -104,7 +104,7 @@ export class Client {
       const idToken = await this.getIdentityCookie();
       if (!idToken) {
         throw new TokenNotFoundError(
-          "A valid ID token cannot be found in cookies. Authentication is required."
+          "A valid ID token cannot be found in cookies. Authentication is required.",
         );
       }
       return (await this.getOrRefreshAccessToken(idToken)) ?? null;
@@ -112,7 +112,7 @@ export class Client {
       this.logger?.debug(
         `Error occurred while getting access token: ${
           error instanceof Error ? error.message : error
-        }`
+        }`,
       );
     }
     return null;
@@ -134,8 +134,7 @@ export class Client {
       const decodedToken = await this.decodeToken(idToken, false);
 
       const cacheKey = `${CONSUMER_DATA_CACHE_KEY}${decodedToken.sub}`;
-      const cachedConsumerDataItem =
-        this.cache.get<ConsumerData>(cacheKey);
+      const cachedConsumerDataItem = this.cache.get<ConsumerData>(cacheKey);
 
       if (cachedConsumerDataItem) {
         return cachedConsumerDataItem;
@@ -147,7 +146,7 @@ export class Client {
 
       const consumerData = await httpClient.get<ConsumerData>(
         `${this.resourceServerBaseUri}/consumer-data`,
-        headers
+        headers,
       );
 
       this.cache.set(cacheKey, consumerData);
@@ -161,8 +160,6 @@ export class Client {
       return null;
     }
   }
-
-
 
   public setCookieHandler(cookieHandler: CookieHandlerInterface) {
     if (!cookieHandler) {
@@ -207,7 +204,7 @@ export class Client {
       } catch (error) {
         if (error instanceof TokenInvalidError) {
           this.logger?.debug(
-            `Invalid token detected during disconnect: ${error.message}`
+            `Invalid token detected during disconnect: ${error.message}`,
           );
           this.removeIdentityCookie();
         } else {
@@ -231,10 +228,21 @@ export class Client {
       code_verifier: codeVerifier || "",
     });
 
-    const tokenResponse = await httpClient.post<
-      TokenResponse & TokenErrorResponse,
-      URLSearchParams
-    >(`${this.authServerBaseUri}/token`, data, headers);
+    let tokenResponse: TokenResponse & TokenErrorResponse;
+
+    try {
+      tokenResponse = await httpClient.post<
+        TokenResponse & TokenErrorResponse,
+        URLSearchParams
+      >(`${this.authServerBaseUri}/token`, data, headers);
+    } catch (error) {
+      this.logger?.debug(
+        `Error occurred while getting token: ${
+          error instanceof Error ? error.message : error
+        }`,
+      );
+      return null;
+    }
 
     if (!tokenResponse || tokenResponse.error) {
       return null;
@@ -243,12 +251,12 @@ export class Client {
     return new CotToken(
       tokenResponse.id_token,
       tokenResponse.refresh_token,
-      tokenResponse.access_token
+      tokenResponse.access_token,
     );
   }
 
   private async getRefreshedToken(
-    refreshToken: string
+    refreshToken: string,
   ): Promise<CotToken | null> {
     const headers = new Headers();
     headers.append("Content-Type", "application/x-www-form-urlencoded");
@@ -260,10 +268,21 @@ export class Client {
       refresh_token: refreshToken,
     });
 
-    const responseJson = await httpClient.post<
-      TokenResponse & TokenErrorResponse,
-      URLSearchParams
-    >(`${this.authServerBaseUri}/token`, data, headers);
+    let responseJson: TokenResponse & TokenErrorResponse;
+
+    try {
+      responseJson = await httpClient.post<
+        TokenResponse & TokenErrorResponse,
+        URLSearchParams
+      >(`${this.authServerBaseUri}/token`, data, headers);
+    } catch (error) {
+      this.logger?.debug(
+        `Error occurred while refreshing token: ${
+          error instanceof Error ? error.message : error
+        }`,
+      );
+      return null;
+    }
 
     if (!responseJson || responseJson.error) {
       return null;
@@ -272,16 +291,19 @@ export class Client {
     return new CotToken(
       responseJson.id_token,
       responseJson.refresh_token,
-      responseJson.access_token
+      responseJson.access_token,
     );
   }
 
   private async getOrRefreshAccessToken(
-    idToken: string
+    idToken: string,
   ): Promise<string | undefined> {
     const token = await this.getTokenFromStorage(idToken);
 
     if (token) {
+      // Keep identity cookie in sync with the latest token available in storage.
+      await this.setIdentityCookie(token.idToken);
+
       let shouldRefresh = false;
 
       try {
@@ -302,7 +324,7 @@ export class Client {
           }
           throw new UnexpectedError(
             `Unexpected error occurred: ${JSON.stringify(error)}`,
-            error
+            error,
           );
         }
       }
@@ -310,24 +332,27 @@ export class Client {
       if (shouldRefresh) {
         try {
           const refreshedToken = await this.getRefreshedToken(
-            token.refreshToken
+            token.refreshToken,
           );
 
           if (!refreshedToken) {
             throw new TokenNotFoundError(
-              "A valid token cannot be found in storage. Authentication is required."
+              "A valid token cannot be found in storage. Authentication is required.",
             );
           }
 
+          token.idToken = refreshedToken.idToken;
+          token.refreshToken = refreshedToken.refreshToken;
           token.accessToken = refreshedToken.accessToken;
-          await this.setTokenOnStorage(refreshedToken);
+
+          await this.setTokenOnStorage(token);
           this.logger?.debug("Access token is refreshed. returning...");
 
           return token.accessToken;
         } catch (error) {
           if (error instanceof Error) {
             this.logger?.debug(
-              `Error occurred while refreshing the token: ${error.message}`
+              `Error occurred while refreshing the token: ${error.message}`,
             );
           }
           this.removeIdentityCookie();
@@ -340,7 +365,7 @@ export class Client {
     }
 
     throw new TokenNotFoundError(
-      "A valid token cannot be found in storage. Authentication is required."
+      "A valid token cannot be found in storage. Authentication is required.",
     );
   }
 
@@ -359,7 +384,7 @@ export class Client {
         }
         throw new UnexpectedError(
           `Unexpected error occurred.: ${JSON.stringify(error)}`,
-          error
+          error,
         );
       }
     }
@@ -378,7 +403,7 @@ export class Client {
         }
         throw new UnexpectedError(
           `Unexpected error occurred: ${JSON.stringify(error)}`,
-          error
+          error,
         );
       }
     }
@@ -453,7 +478,7 @@ export class Client {
     await this.cookieHandler?.set(
       IDENTITY_COOKIE_KEY,
       idToken,
-      new Date(Date.now() + 31536000000)
+      new Date(Date.now() + 31536000000),
     );
   }
 
@@ -463,22 +488,22 @@ export class Client {
 
   private async setCodeVerifierAndChallengeCookie(
     codeVerifier: string,
-    codeChallenge: string
+    codeChallenge: string,
   ): Promise<void> {
     const encryptedCodeVerifier = encryptValue(this.clientSecret, codeVerifier);
     await this.cookieHandler?.set(
       CODE_VERIFIER_COOKIE_KEY,
-      encryptedCodeVerifier
+      encryptedCodeVerifier,
     );
     await this.cookieHandler?.set(CODE_CHALLENGE_COOKIE_KEY, codeChallenge);
   }
 
   private async refreshPKCE(force = false): Promise<void> {
     const codeVerifierCookie = await this.cookieHandler?.get(
-      CODE_VERIFIER_COOKIE_KEY
+      CODE_VERIFIER_COOKIE_KEY,
     );
     const codeChallengeCookie = await this.cookieHandler?.get(
-      CODE_CHALLENGE_COOKIE_KEY
+      CODE_CHALLENGE_COOKIE_KEY,
     );
 
     if (force || !codeVerifierCookie || !codeChallengeCookie) {
@@ -490,7 +515,7 @@ export class Client {
 
   private async getCodeVerifierCookie(): Promise<string | null> {
     const encryptedCodeVerifier = await this.cookieHandler?.get(
-      CODE_VERIFIER_COOKIE_KEY
+      CODE_VERIFIER_COOKIE_KEY,
     );
 
     if (encryptedCodeVerifier) {
@@ -500,7 +525,7 @@ export class Client {
         this.logger?.debug(
           `Invalid code verifier cookie detected: ${
             error instanceof Error ? error.message : error
-          }`
+          }`,
         );
         await this.cookieHandler?.remove(CODE_VERIFIER_COOKIE_KEY);
         await this.cookieHandler?.remove(CODE_CHALLENGE_COOKIE_KEY);
