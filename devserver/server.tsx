@@ -1,8 +1,8 @@
 import https from 'node:https';
-import fs from "fs";
+import fs from "node:fs";
 import express from 'express';
 import cookieParser from 'cookie-parser';
-import path from 'path';
+import path from 'node:path';
 import { InFileAuthStorage } from './in-file-authstorage';
 import { Client, CookieHandlerInterface, ActionType } from '../src';
 import { createServer } from 'vite';
@@ -28,6 +28,7 @@ const vite = await createServer({
   },
   appType: 'custom',
   base,
+  root: path.resolve(import.meta.dirname),
 })
 app.use(vite.middlewares)
 const authStorage = new InFileAuthStorage(path.resolve(import.meta.dirname, "auth-storage.json"));
