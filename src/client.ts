@@ -285,6 +285,11 @@ export class Client {
     }
 
     if (!responseJson || responseJson.error) {
+      // Check if error indicates refresh token is permanently invalid
+      if (responseJson?.error && ['invalid_grant', 'invalid_token'].includes(responseJson.error)) {
+        this.logger?.debug(`Refresh token is invalid or revoked: ${responseJson.error}`);
+        this.removeIdentityCookie();
+      }
       return null;
     }
 
