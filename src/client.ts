@@ -55,7 +55,7 @@ export class Client {
     clientId: string,
     clientSecret: string,
     authStorage: AuthStorageInterface,
-    env: Environment = "prod"
+    env: Environment = "prod",
   ) {
     if (!clientId) {
       throw new RequiredParameterMissingError("Client ID is required.");
@@ -77,13 +77,13 @@ export class Client {
     this.redirectUri = "";
     this.cache = new NodeCache();
     this.jwks = jose.createRemoteJWKSet(
-      new URL(`${this.authServerBaseUri}/certs`)
+      new URL(`${this.authServerBaseUri}/certs`),
     );
   }
 
   public async handleCallback(
     code?: string,
-    cotAction?: ActionType
+    cotAction?: ActionType,
   ): Promise<void> {
     if (code) {
       await this.handleAuthCode(code);
@@ -104,7 +104,7 @@ export class Client {
       const idToken = await this.getIdentityCookie();
       if (!idToken) {
         throw new TokenNotFoundError(
-          "A valid ID token cannot be found in cookies. Authentication is required."
+          "A valid ID token cannot be found in cookies. Authentication is required.",
         );
       }
       return (await this.getOrRefreshAccessToken(idToken)) ?? null;
@@ -112,7 +112,7 @@ export class Client {
       this.logger?.debug(
         `Error occurred while getting access token: ${
           error instanceof Error ? error.message : error
-        }`
+        }`,
       );
     }
     return null;
@@ -134,8 +134,7 @@ export class Client {
       const decodedToken = await this.decodeToken(idToken, false);
 
       const cacheKey = `${CONSUMER_DATA_CACHE_KEY}${decodedToken.sub}`;
-      const cachedConsumerDataItem =
-        this.cache.get<ConsumerData>(cacheKey);
+      const cachedConsumerDataItem = this.cache.get<ConsumerData>(cacheKey);
 
       if (cachedConsumerDataItem) {
         return cachedConsumerDataItem;
@@ -147,7 +146,7 @@ export class Client {
 
       const consumerData = await httpClient.get<ConsumerData>(
         `${this.resourceServerBaseUri}/consumer-data`,
-        headers
+        headers,
       );
 
       this.cache.set(cacheKey, consumerData);
@@ -161,8 +160,6 @@ export class Client {
       return null;
     }
   }
-
-
 
   public setCookieHandler(cookieHandler: CookieHandlerInterface) {
     if (!cookieHandler) {
@@ -200,9 +197,20 @@ export class Client {
   private async disconnect(): Promise<void> {
     const idToken = await this.getIdentityCookie();
     if (idToken) {
-      const decodedToken = await this.decodeToken(idToken, false);
-      this.authStorage.remove(decodedToken.sub);
-      this.removeIdentityCookie();
+      try {
+        const decodedToken = await this.decodeToken(idToken, false);
+        this.authStorage.remove(decodedToken.sub);
+        this.removeIdentityCookie();
+      } catch (error) {
+        if (error instanceof TokenInvalidError) {
+          this.logger?.debug(
+            `Invalid token detected during disconnect: ${error.message}`,
+          );
+          this.removeIdentityCookie();
+        } else {
+          throw error;
+        }
+      }
     }
   }
 
@@ -220,10 +228,21 @@ export class Client {
       code_verifier: codeVerifier || "",
     });
 
-    const tokenResponse = await httpClient.post<
-      TokenResponse & TokenErrorResponse,
-      URLSearchParams
-    >(`${this.authServerBaseUri}/token`, data, headers);
+    let tokenResponse: TokenResponse & TokenErrorResponse;
+
+    try {
+      tokenResponse = await httpClient.post<
+        TokenResponse & TokenErrorResponse,
+        URLSearchParams
+      >(`${this.authServerBaseUri}/token`, data, headers);
+    } catch (error) {
+      this.logger?.debug(
+        `Error occurred while getting token: ${
+          error instanceof Error ? error.message : error
+        }`,
+      );
+      return null;
+    }
 
     if (!tokenResponse || tokenResponse.error) {
       return null;
@@ -232,12 +251,12 @@ export class Client {
     return new CotToken(
       tokenResponse.id_token,
       tokenResponse.refresh_token,
-      tokenResponse.access_token
+      tokenResponse.access_token,
     );
   }
 
   private async getRefreshedToken(
-    refreshToken: string
+    refreshToken: string,
   ): Promise<CotToken | null> {
     const headers = new Headers();
     headers.append("Content-Type", "application/x-www-form-urlencoded");
@@ -249,24 +268,40 @@ export class Client {
       refresh_token: refreshToken,
     });
 
-    const responseJson = await httpClient.post<
-      TokenResponse & TokenErrorResponse,
-      URLSearchParams
-    >(`${this.authServerBaseUri}/token`, data, headers);
+    let responseJson: TokenResponse & TokenErrorResponse;
+
+    try {
+      responseJson = await httpClient.post<
+        TokenResponse & TokenErrorResponse,
+        URLSearchParams
+      >(`${this.authServerBaseUri}/token`, data, headers);
+    } catch (error) {
+      this.logger?.debug(
+        `Error occurred while refreshing token: ${
+          error instanceof Error ? error.message : error
+        }`,
+      );
+      return null;
+    }
 
     if (!responseJson || responseJson.error) {
+      // Check if error indicates refresh token is permanently invalid
+      if (responseJson?.error && ['invalid_grant', 'invalid_token'].includes(responseJson.error)) {
+        this.logger?.debug(`Refresh token is invalid or revoked: ${responseJson.error}`);
+        this.removeIdentityCookie();
+      }
       return null;
     }
 
     return new CotToken(
       responseJson.id_token,
       responseJson.refresh_token,
-      responseJson.access_token
+      responseJson.access_token,
     );
   }
 
   private async getOrRefreshAccessToken(
-    idToken: string
+    idToken: string,
   ): Promise<string | undefined> {
     const token = await this.getTokenFromStorage(idToken);
 
@@ -285,41 +320,63 @@ export class Client {
         if (error instanceof jose.errors.JWTExpired) {
           this.logger?.debug("access token is expired. refreshing...");
           shouldRefresh = true;
+        } else if (error instanceof TokenInvalidError) {
+          this.logger?.error(`Invalid access token format: ${error.message}`);
+          shouldRefresh = true;
         } else {
           if (error instanceof Error) {
             this.logger?.error(error.message);
           }
           throw new UnexpectedError(
             `Unexpected error occurred: ${JSON.stringify(error)}`,
-            error
+            error,
           );
+        }
+      }
+
+      // If access token is valid, also check if ID token is expired or invalid
+      // to ensure the cookie always contains a fresh ID token
+      if (!shouldRefresh) {
+        try {
+          const decodedIdToken = await this.decodeToken(token.idToken, false);
+          if (decodedIdToken.exp && decodedIdToken.exp < Math.floor(Date.now() / 1000)) {
+            this.logger?.debug("ID token is expired. Refreshing to update cookie...");
+            shouldRefresh = true;
+          }
+        } catch (error) {
+          if (error instanceof TokenInvalidError) {
+            this.logger?.debug("ID token format is invalid. Refreshing to update cookie...");
+            shouldRefresh = true;
+          }
         }
       }
 
       if (shouldRefresh) {
         try {
           const refreshedToken = await this.getRefreshedToken(
-            token.refreshToken
+            token.refreshToken,
           );
 
           if (!refreshedToken) {
             throw new TokenNotFoundError(
-              "A valid token cannot be found in storage. Authentication is required."
+              "A valid token cannot be found in storage. Authentication is required.",
             );
           }
 
+          token.idToken = refreshedToken.idToken;
+          token.refreshToken = refreshedToken.refreshToken;
           token.accessToken = refreshedToken.accessToken;
-          await this.setTokenOnStorage(refreshedToken);
-          this.logger?.debug("Access token is refreshed. returning...");
+
+          await this.setTokenOnStorage(token);
+          this.logger?.debug("Tokens refreshed. ID token cookie updated.");
 
           return token.accessToken;
         } catch (error) {
           if (error instanceof Error) {
             this.logger?.debug(
-              `Error occurred while refreshing the token: ${error.message}`
+              `Error occurred while refreshing the token: ${error.message}`,
             );
           }
-          this.removeIdentityCookie();
           throw error;
         }
       }
@@ -329,24 +386,28 @@ export class Client {
     }
 
     throw new TokenNotFoundError(
-      "A valid token cannot be found in storage. Authentication is required."
+      "A valid token cannot be found in storage. Authentication is required.",
     );
   }
 
   private async setTokenOnStorage(token: CotToken): Promise<void> {
+    // Always set the identity cookie first, regardless of storage success
+    // This ensures the frontend is updated even if token storage fails
+    await this.setIdentityCookie(token.idToken);
+
     try {
       const decodedToken = await this.decodeToken(token.idToken, false);
       this.authStorage.set(decodedToken.sub, token);
     } catch (error) {
-      if (error instanceof jose.errors.JWTExpired) {
-        this.logger?.debug("id token is expired. returning...");
+      if (error instanceof TokenInvalidError) {
+        this.logger?.error(`Invalid token format: ${error.message}`);
       } else {
         if (error instanceof Error) {
           this.logger?.error(error.message);
         }
         throw new UnexpectedError(
           `Unexpected error occurred.: ${JSON.stringify(error)}`,
-          error
+          error,
         );
       }
     }
@@ -357,15 +418,15 @@ export class Client {
       const decodedToken = await this.decodeToken(idToken, false);
       return this.authStorage.get(decodedToken.sub);
     } catch (error) {
-      if (error instanceof jose.errors.JWTExpired) {
-        this.logger?.debug("id token is expired. returning...");
+      if (error instanceof TokenInvalidError) {
+        this.logger?.error(`Invalid token format: ${error.message}`);
       } else {
         if (error instanceof Error) {
           this.logger?.error(error.message);
         }
         throw new UnexpectedError(
           `Unexpected error occurred: ${JSON.stringify(error)}`,
-          error
+          error,
         );
       }
     }
@@ -373,9 +434,41 @@ export class Client {
     return null;
   }
 
+  /**
+   * Validates if the provided token string is in valid JWT format.
+   * Checks if the token has exactly 3 parts separated by dots and has a non-empty payload.
+   *
+   * @param token - The JWT token string to validate
+   * @returns true if token is in valid JWT format, false otherwise
+   */
+  private isValidJwtFormat(token: string): boolean {
+    if (!token || typeof token !== "string") {
+      return false;
+    }
+
+    const parts = token.split(".");
+
+    // JWT should have exactly 3 parts: header.payload.signature
+    if (parts.length !== 3) {
+      return false;
+    }
+
+    // Check if payload (second part) is not empty
+    if (!parts[1] || parts[1].trim() === "") {
+      return false;
+    }
+
+    return true;
+  }
+
   private async decodeToken(token: string, validateExp = true) {
     if (!token) {
       throw new TokenInvalidError("Token cannot be empty or null.");
+    }
+
+    // Validate JWT format before attempting to decode
+    if (!this.isValidJwtFormat(token)) {
+      throw new TokenInvalidError("Token is not in valid JWT format.");
     }
 
     if (!validateExp) {
@@ -387,11 +480,7 @@ export class Client {
   }
 
   private async handleAuthCode(code: string): Promise<void> {
-    const token = await this.connect(code);
-
-    if (token) {
-      await this.setIdentityCookie(token.idToken);
-    }
+    await this.connect(code);
   }
 
   private async handleAction(actionType: ActionType): Promise<void> {
@@ -408,7 +497,7 @@ export class Client {
     await this.cookieHandler?.set(
       IDENTITY_COOKIE_KEY,
       idToken,
-      new Date(Date.now() + 31536000000)
+      new Date(Date.now() + 31536000000),
     );
   }
 
@@ -418,22 +507,22 @@ export class Client {
 
   private async setCodeVerifierAndChallengeCookie(
     codeVerifier: string,
-    codeChallenge: string
+    codeChallenge: string,
   ): Promise<void> {
     const encryptedCodeVerifier = encryptValue(this.clientSecret, codeVerifier);
     await this.cookieHandler?.set(
       CODE_VERIFIER_COOKIE_KEY,
-      encryptedCodeVerifier
+      encryptedCodeVerifier,
     );
     await this.cookieHandler?.set(CODE_CHALLENGE_COOKIE_KEY, codeChallenge);
   }
 
   private async refreshPKCE(force = false): Promise<void> {
     const codeVerifierCookie = await this.cookieHandler?.get(
-      CODE_VERIFIER_COOKIE_KEY
+      CODE_VERIFIER_COOKIE_KEY,
     );
     const codeChallengeCookie = await this.cookieHandler?.get(
-      CODE_CHALLENGE_COOKIE_KEY
+      CODE_CHALLENGE_COOKIE_KEY,
     );
 
     if (force || !codeVerifierCookie || !codeChallengeCookie) {
@@ -445,11 +534,21 @@ export class Client {
 
   private async getCodeVerifierCookie(): Promise<string | null> {
     const encryptedCodeVerifier = await this.cookieHandler?.get(
-      CODE_VERIFIER_COOKIE_KEY
+      CODE_VERIFIER_COOKIE_KEY,
     );
 
     if (encryptedCodeVerifier) {
-      return decryptValue(this.clientSecret, encryptedCodeVerifier);
+      try {
+        return decryptValue(this.clientSecret, encryptedCodeVerifier);
+      } catch (error) {
+        this.logger?.debug(
+          `Invalid code verifier cookie detected: ${
+            error instanceof Error ? error.message : error
+          }`,
+        );
+        await this.cookieHandler?.remove(CODE_VERIFIER_COOKIE_KEY);
+        await this.cookieHandler?.remove(CODE_CHALLENGE_COOKIE_KEY);
+      }
     }
 
     return null;

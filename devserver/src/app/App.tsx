@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import "./App.css";
 import { ConsumerData } from "../../../src";
@@ -11,9 +11,11 @@ declare global {
 
 function App() {
   const [authUser, setAuthUser] = useState<ConsumerData>();
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    const authUser = window.authUser;
+    setIsClient(true);
+    const authUser = globalThis.window.authUser;
     if (authUser) {
       setAuthUser(authUser);
     }
@@ -23,7 +25,7 @@ function App() {
     <main className="App" style={{ display: "none" }}>
       <div className="App-header">
         <h1>Development Server</h1>
-        <trstd-login tsid="X832CCBC339C1B6586599463D3C2C5DF5"></trstd-login>
+        {isClient && <trstd-login tsid="X832CCBC339C1B6586599463D3C2C5DF5"></trstd-login>}
       </div>
       <hr />
       {authUser ? (

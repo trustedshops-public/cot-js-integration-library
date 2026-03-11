@@ -43,9 +43,28 @@ jobs:
     executor: node
     steps:
       - checkout
+      - run:
+          name: Print runtime versions
+          command: |
+            node --version
+            npm --version
+      - run:
+          name: Print pinned npm version
+          command: |
+            npx --yes npm@11.3.0 --version
       - restore_cache:
           key: npm-packages-{{ checksum "package-lock.json" }}
-      - run: npm ci
+      - run:
+          name: Install dependencies
+          command: |
+            npx --yes npm@11.3.0 ci --include=optional
+      - run:
+          name: Ensure Linux native optional deps
+          command: |
+            if ! node -e "require.resolve('@rollup/rollup-linux-x64-gnu')" >/dev/null 2>&1; then
+              echo "Missing @rollup/rollup-linux-x64-gnu after npm ci. Installing fallback optional deps..."
+              npx --yes npm@11.3.0 install --no-save @rollup/rollup-linux-x64-gnu @esbuild/linux-x64
+            fi
       - save_cache:
           key: npm-packages-{{ checksum "package-lock.json" }}
           paths:
